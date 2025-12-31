@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:wght@700&display=swap');
         body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e5e5e5; }
         .casino-gradient { background: radial-gradient(circle at center, #1a4731 0%, #0a1f14 100%); }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -35,19 +35,19 @@
         }
     </style>
 </head>
-<body class="h-screen overflow-hidden casino-gradient flex flex-col p-1 md:p-4">
-    <div class="h-full flex flex-col max-w-[1600px] mx-auto w-full gap-1">
+<body class="h-screen overflow-hidden casino-gradient flex flex-col p-1 md:p-3">
+    <div class="h-full flex flex-col max-w-[1600px] mx-auto w-full gap-0.5 md:gap-1">
         <!-- Header -->
-        <header class="flex-shrink-0 flex items-center justify-between px-2 py-0.5 md:py-1 bg-black/30 rounded border border-white/5 backdrop-blur-sm z-10">
+        <header class="flex-shrink-0 flex items-center justify-between px-2 py-0.5 bg-black/30 rounded border border-white/5 backdrop-blur-sm z-10">
             <div class="flex items-center gap-2">
-                <h1 class="text-[10px] md:text-2xl font-black italic tracking-tighter uppercase">BACCARAT<span class="text-yellow-400">PRO</span></h1>
+                <h1 class="text-[10px] md:text-xl lg:text-2xl font-black italic tracking-tighter uppercase">BACCARAT<span class="text-yellow-400">PRO</span></h1>
                 <button id="settings-btn" class="p-1 rounded-full bg-white/5 border border-transparent hover:border-white/10 transition-all">
                     <i class="fas fa-cog text-neutral-400 text-[8px] md:text-base"></i>
                 </button>
             </div>
             <div class="flex items-center gap-2">
                 <div class="flex items-center gap-1.5">
-                    <div class="w-12 md:w-24 h-1 bg-neutral-800 rounded-full overflow-hidden">
+                    <div class="w-10 md:w-20 h-1 bg-neutral-800 rounded-full overflow-hidden">
                         <div id="shoe-progress" class="h-full bg-emerald-500 transition-all" style="width: 0%"></div>
                     </div>
                     <span id="shoe-count" class="text-[7px] md:text-[10px] font-mono text-neutral-500">0/416</span>
@@ -57,72 +57,73 @@
         </header>
 
         <!-- Main Display -->
-        <main class="flex-grow flex flex-col gap-1 overflow-hidden">
-            <div class="flex-shrink-0 flex flex-row items-stretch justify-center gap-1 md:gap-12 px-1 py-2 md:py-4 bg-black/10 rounded-xl md:rounded-2xl border border-white/5 shadow-2xl">
+        <main class="flex-grow flex flex-col gap-1 overflow-hidden min-h-0">
+            <div class="flex-shrink-0 flex flex-row items-stretch justify-center gap-1 md:gap-4 lg:gap-12 px-1 py-1 md:py-3 bg-black/10 rounded-xl md:rounded-2xl border border-white/5 shadow-2xl">
                 <!-- Player Hand -->
                 <div class="flex flex-col items-center gap-0.5 flex-1 overflow-hidden">
-                    <h2 class="text-blue-400 font-black tracking-widest uppercase text-[10px] md:text-3xl">Player</h2>
-                    <div id="player-cards" class="flex flex-wrap gap-0.5 p-1 md:p-6 bg-black/40 rounded-xl border border-white/10 w-full justify-center min-h-[70px] md:min-h-[320px] items-center relative shadow-inner overflow-hidden"></div>
-                    <div class="mt-1 bg-black/80 px-2 py-0.5 md:px-8 md:py-2 rounded-full border border-white/20">
-                        <span id="player-score" class="text-sm md:text-5xl font-black text-white">0</span>
+                    <h2 class="text-blue-400 font-black tracking-widest uppercase text-[10px] md:text-xl lg:text-2xl">Player</h2>
+                    <div id="player-cards" class="flex flex-wrap gap-0.5 p-1 md:p-3 bg-black/40 rounded-xl border border-white/10 w-full justify-center min-h-[70px] md:min-h-[140px] lg:min-h-[180px] items-center relative shadow-inner overflow-hidden"></div>
+                    <div class="mt-1 bg-black/80 px-2 py-0.5 md:px-6 md:py-1 rounded-full border border-white/20">
+                        <span id="player-score" class="text-sm md:text-2xl lg:text-3xl font-black text-white">0</span>
                     </div>
                 </div>
 
                 <!-- Central HUD -->
-                <div class="flex flex-col items-center justify-center min-w-[60px] md:min-w-[300px] h-full gap-2">
-                    <div id="initializing-label" class="hidden text-center animate-pulse"><p class="text-yellow-400 text-[8px] md:text-xl font-bold uppercase">Burn <span id="burn-value"></span></p></div>
+                <div class="flex flex-col items-center justify-center min-w-[60px] md:min-w-[180px] lg:min-w-[300px] h-full gap-1 md:gap-4">
+                    <div id="initializing-label" class="hidden text-center animate-pulse"><p class="text-yellow-400 text-[8px] md:text-base lg:text-xl font-bold uppercase">Burn <span id="burn-value"></span></p></div>
                     <div id="auto-status" class="hidden flex flex-col items-center gap-1">
-                        <div id="timer-display" class="w-8 h-8 md:w-24 md:h-24 rounded-full border-2 md:border-4 border-yellow-400 shadow-lg flex items-center justify-center text-xs md:text-4xl font-black text-yellow-400 bg-black/60">10</div>
-                        <span class="text-[6px] md:text-sm font-black uppercase text-yellow-500/80">Auto</span>
+                        <div id="timer-display" class="w-8 h-8 md:w-16 lg:w-24 md:h-16 lg:h-24 rounded-full border-2 md:border-4 border-yellow-400 shadow-lg flex items-center justify-center text-xs md:text-2xl lg:text-4xl font-black text-yellow-400 bg-black/60">10</div>
+                        <span class="text-[6px] md:text-[10px] font-black uppercase text-yellow-500/80">Auto</span>
                     </div>
-                    <div id="result-label" class="hidden text-center px-2 py-1 md:px-10 md:py-5 rounded-lg font-black text-[8px] md:text-3xl shadow-2xl ring-1 md:ring-2 ring-white/20">...</div>
-                    <div id="manual-label" class="text-neutral-500 text-[8px] md:text-lg font-black uppercase bg-white/5 px-2 py-1 rounded-full border border-white/5">Bet</div>
+                    <div id="result-label" class="hidden text-center px-2 py-1 md:px-6 md:py-2 lg:px-10 lg:py-5 rounded-lg font-black text-[8px] md:text-xl lg:text-3xl shadow-2xl ring-1 md:ring-2 ring-white/20">...</div>
+                    <div id="manual-label" class="text-neutral-500 text-[8px] md:text-sm lg:text-lg font-black uppercase bg-white/5 px-2 py-0.5 md:py-1 rounded-full border border-white/5">Bet</div>
                 </div>
 
                 <!-- Banker Hand -->
                 <div class="flex flex-col items-center gap-0.5 flex-1 overflow-hidden">
-                    <h2 class="text-red-400 font-black tracking-widest uppercase text-[10px] md:text-3xl">Banker</h2>
-                    <div id="banker-cards" class="flex flex-wrap gap-0.5 p-1 md:p-6 bg-black/40 rounded-xl border border-white/10 w-full justify-center min-h-[70px] md:min-h-[320px] items-center shadow-inner overflow-hidden"></div>
-                    <div class="mt-1 bg-black/80 px-2 py-0.5 md:px-8 md:py-2 rounded-full border border-white/20">
-                        <span id="banker-score" class="text-sm md:text-5xl font-black text-white">0</span>
+                    <h2 class="text-red-400 font-black tracking-widest uppercase text-[10px] md:text-xl lg:text-2xl">Banker</h2>
+                    <div id="banker-cards" class="flex flex-wrap gap-0.5 p-1 md:p-3 bg-black/40 rounded-xl border border-white/10 w-full justify-center min-h-[70px] md:min-h-[140px] lg:min-h-[180px] items-center relative shadow-inner overflow-hidden"></div>
+                    <div class="mt-1 bg-black/80 px-2 py-0.5 md:px-6 md:py-1 rounded-full border border-white/20">
+                        <span id="banker-score" class="text-sm md:text-2xl lg:text-3xl font-black text-white">0</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Roadmaps -->
-            <div class="flex-shrink-0 flex flex-col gap-0.5 md:gap-1 bg-black/60 p-1 md:p-3 rounded-lg border border-white/5 shadow-2xl overflow-hidden min-h-0">
-                <div class="flex gap-1 h-14 md:h-40">
+            <!-- Roadmaps - Condensed for Monitor Height -->
+            <div class="flex-grow min-h-0 flex flex-col gap-0.5 md:gap-1 bg-black/60 p-1 md:p-2 rounded-lg border border-white/5 shadow-2xl overflow-hidden">
+                <div class="flex gap-1 h-16 md:h-32 lg:h-40 flex-shrink-0">
                     <div class="flex flex-col flex-grow min-w-0">
-                        <h3 class="text-[6px] md:text-[10px] font-bold text-neutral-500 mb-0.5 uppercase tracking-widest">Big Road</h3>
+                        <h3 class="text-[6px] md:text-[9px] font-bold text-neutral-500 mb-0.5 uppercase tracking-widest">Big Road</h3>
                         <div id="big-road" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-900 rounded overflow-x-auto scrollbar-hide h-full w-full"></div>
                     </div>
-                    <div class="hidden sm:flex flex-col w-56 md:w-72">
-                        <h3 class="text-[6px] md:text-[10px] font-bold text-neutral-500 mb-0.5 uppercase tracking-widest">Bead Plate</h3>
+                    <div class="hidden sm:flex flex-col w-20 md:w-48 lg:w-56">
+                        <h3 class="text-[6px] md:text-[9px] font-bold text-neutral-500 mb-0.5 uppercase tracking-widest">Bead Plate</h3>
                         <div id="bead-plate" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-900 rounded overflow-x-auto scrollbar-hide h-full w-full"></div>
                     </div>
                 </div>
-                <div class="grid grid-cols-3 md:flex md:flex-col gap-1 overflow-hidden">
-                    <div><h3 class="text-[5px] md:text-[9px] font-bold text-neutral-500 uppercase truncate">Big Eye</h3><div id="big-eye-boy" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-900 h-8 md:h-24 overflow-x-auto scrollbar-hide"></div></div>
-                    <div><h3 class="text-[5px] md:text-[9px] font-bold text-neutral-500 uppercase truncate">Small</h3><div id="small-road" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-900 h-8 md:h-24 overflow-x-auto scrollbar-hide"></div></div>
-                    <div><h3 class="text-[5px] md:text-[9px] font-bold text-neutral-500 uppercase truncate">Cockroach</h3><div id="cockroach-road" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-900 h-8 md:h-24 overflow-x-auto scrollbar-hide"></div></div>
+                <!-- Derived Roads in a row on all devices -->
+                <div class="grid grid-cols-3 gap-1 overflow-hidden h-12 md:h-20 lg:h-28 flex-shrink-0">
+                    <div class="flex flex-col"><h3 class="text-[5px] md:text-[8px] font-bold text-neutral-500 uppercase truncate">Big Eye</h3><div id="big-eye-boy" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-900 h-full overflow-x-auto scrollbar-hide"></div></div>
+                    <div class="flex flex-col"><h3 class="text-[5px] md:text-[8px] font-bold text-neutral-500 uppercase truncate">Small</h3><div id="small-road" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-900 h-full overflow-x-auto scrollbar-hide"></div></div>
+                    <div class="flex flex-col"><h3 class="text-[5px] md:text-[8px] font-bold text-neutral-500 uppercase truncate">Cockroach</h3><div id="cockroach-road" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-900 h-full overflow-x-auto scrollbar-hide"></div></div>
                 </div>
             </div>
 
-            <!-- Control Bar -->
-            <div class="mt-auto relative flex flex-col gap-1">
+            <!-- Control Bar - Sized for perfect fit -->
+            <div class="mt-auto relative flex flex-col gap-1 flex-shrink-0">
                 <div id="deal-button-container" class="absolute -top-10 left-1/2 -translate-x-1/2 z-20 hidden">
                     <button id="deal-btn" class="bg-yellow-500 hover:bg-yellow-400 text-black px-8 py-2 md:px-16 md:py-4 rounded-lg md:rounded-xl font-black text-xs md:text-2xl uppercase shadow-xl border-b-2 md:border-b-4 border-yellow-700 active:translate-y-1">Deal</button>
                 </div>
                 <!-- Betting Areas - Shorter by ~30% -->
-                <div class="grid grid-cols-5 gap-1 h-10 md:h-24" id="betting-areas"></div>
-                <div class="bg-black/50 p-1 md:p-3 rounded-xl border border-white/10 flex items-center justify-between gap-2 shadow-2xl backdrop-blur-md">
+                <div class="grid grid-cols-5 gap-1 h-10 md:h-24 lg:h-28" id="betting-areas"></div>
+                <div class="bg-black/50 p-1 md:p-3 lg:p-4 rounded-xl border border-white/10 flex items-center justify-between gap-2 shadow-2xl backdrop-blur-md">
                     <div class="flex items-center gap-2">
                         <button id="clear-btn" class="px-1.5 py-1 bg-neutral-800 border border-white/10 text-neutral-400 text-[8px] md:text-[10px] font-black uppercase rounded hover:bg-neutral-700 transition-colors">Recall</button>
-                        <div id="chip-selection" class="flex gap-1 md:gap-3"></div>
+                        <div id="chip-selection" class="flex gap-1 md:gap-4"></div>
                     </div>
                     <div class="flex flex-col items-end">
                         <span class="text-neutral-500 text-[6px] md:text-[10px] uppercase font-bold">Bankroll</span>
-                        <span id="balance-display" class="text-sm md:text-4xl font-black text-yellow-400 leading-none">$10,000</span>
+                        <span id="balance-display" class="text-sm md:text-2xl lg:text-4xl font-black text-yellow-400 leading-none">$10,000</span>
                     </div>
                 </div>
             </div>

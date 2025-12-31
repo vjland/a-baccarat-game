@@ -1,3 +1,4 @@
+
 import * as Game from './logic.js';
 
 let shoe = [], 
@@ -153,7 +154,8 @@ function handleDeal(instant) {
         for (let target in currentBets) {
             const amt = currentBets[target];
             if (target === Game.BetTarget.Player && result.winner === Game.Winner.Player) payout += amt * 2;
-            else if (target === Game.BetTarget.Banker && result.winner === Game.Winner.Banker) payout += amt * 1.95;
+            // Banker payout updated to 1:1 for training purposes (was amt * 1.95)
+            else if (target === Game.BetTarget.Banker && result.winner === Game.Winner.Banker) payout += amt * 2;
             else if (target === Game.BetTarget.Tie && result.winner === Game.Winner.Tie) payout += amt * 9;
             else if (result.winner === Game.Winner.Tie && (target === Game.BetTarget.Player || target === Game.BetTarget.Banker)) payout += amt;
             
@@ -204,7 +206,7 @@ function setupBettingAreas() {
         { id: Game.BetTarget.PlayerPair, l: 'P.PAIR', odds: '11:1', c: 'bg-blue-900/40 text-blue-300' },
         { id: Game.BetTarget.Player, l: 'PLAYER', odds: '1:1', c: 'bg-blue-600/80 text-white font-black' },
         { id: Game.BetTarget.Tie, l: 'TIE', odds: '8:1', c: 'bg-green-700/80 text-white font-black' },
-        { id: Game.BetTarget.Banker, l: 'BANKER', odds: '0.95:1', c: 'bg-red-600/80 text-white font-black' },
+        { id: Game.BetTarget.Banker, l: 'BANKER', odds: '1:1', c: 'bg-red-600/80 text-white font-black' },
         { id: Game.BetTarget.BankerPair, l: 'B.PAIR', odds: '11:1', c: 'bg-red-900/40 text-red-300' }
     ];
     el.bettingAreas.innerHTML = areas.map(a => `
@@ -239,7 +241,7 @@ function setupChips() {
     [100, 200, 500].forEach(v => {
         const b = document.createElement('button'); 
         b.textContent = v;
-        b.className = `w-6 h-6 md:w-10 md:h-10 rounded-full border-2 border-white/20 text-[7px] md:text-[10px] font-black transition-transform ${v===100?'bg-black':v===200?'bg-blue-600':'bg-purple-600'}`;
+        b.className = `w-6 h-6 md:w-10 lg:w-14 md:h-10 lg:h-14 rounded-full border-2 border-white/20 text-[7px] md:text-[10px] lg:text-sm font-black transition-transform ${v===100?'bg-black':v===200?'bg-blue-600':'bg-purple-600'}`;
         b.onclick = () => { selectedChip = v; render(); };
         b.id = `chip-${v}`; 
         el.chipSelection.appendChild(b);
@@ -264,7 +266,7 @@ function render() {
     if (gameState === 'result' && lastResult) {
         const w = lastResult.winner; 
         el.resLabel.textContent = w === Game.Winner.Player ? 'PLAYER' : w === Game.Winner.Banker ? 'BANKER' : 'TIE';
-        el.resLabel.className = `text-center px-2 py-1 md:px-10 md:py-5 rounded-lg font-black text-[8px] md:text-3xl shadow-2xl ring-1 md:ring-2 ring-white/20 ${w===Game.Winner.Player?'bg-blue-600/90':w===Game.Winner.Banker?'bg-red-600/90':'bg-green-600/90'}`;
+        el.resLabel.className = `text-center px-2 py-1 md:px-6 md:py-2 lg:px-10 lg:py-5 rounded-lg font-black text-[8px] md:text-xl lg:text-3xl shadow-2xl ring-1 md:ring-2 ring-white/20 ${w===Game.Winner.Player?'bg-blue-600/90':w===Game.Winner.Banker?'bg-red-600/90':'bg-green-600/90'}`;
         
         if (w===Game.Winner.Player||w===Game.Winner.Tie) el.player.classList.add('animate-winner-flash','ring-2','ring-blue-500/50'); 
         else el.player.classList.remove('animate-winner-flash','ring-2','ring-blue-500/50');
@@ -301,14 +303,14 @@ function render() {
 
 function renderCards(container, cards) {
     if (cards.length === 0) {
-        container.innerHTML = '<div class="w-10 h-14 md:w-24 md:h-36 bg-white/5 border border-white/10 rounded flex items-center justify-center text-white/10 text-xl">?</div>';
+        container.innerHTML = '<div class="w-10 h-14 md:w-20 lg:w-24 md:h-28 lg:h-36 bg-white/5 border border-white/10 rounded flex items-center justify-center text-white/10 text-xl">?</div>';
         return;
     }
     container.innerHTML = cards.map(c => `
-        <div class="w-10 h-14 md:w-24 md:h-36 bg-white rounded shadow-lg flex flex-col p-1 transform">
-            <div class="text-[8px] md:text-lg font-bold ${c.suit==='♥'||c.suit==='♦'?'text-red-600':'text-black'}">${c.rank}</div>
-            <div class="flex-grow flex items-center justify-center text-lg md:text-4xl ${c.suit==='♥'||c.suit==='♦'?'text-red-600':'text-black'}">${c.suit}</div>
-            <div class="text-[8px] md:text-lg font-bold self-end rotate-180 ${c.suit==='♥'||c.suit==='♦'?'text-red-600':'text-black'}">${c.rank}</div>
+        <div class="w-10 h-14 md:w-20 lg:w-24 md:h-28 lg:h-36 bg-white rounded shadow-lg flex flex-col p-1 transform">
+            <div class="text-[8px] md:text-sm lg:text-lg font-bold ${c.suit==='♥'||c.suit==='♦'?'text-red-600':'text-black'}">${c.rank}</div>
+            <div class="flex-grow flex items-center justify-center text-lg md:text-3xl lg:text-4xl ${c.suit==='♥'||c.suit==='♦'?'text-red-600':'text-black'}">${c.suit}</div>
+            <div class="text-[8px] md:text-sm lg:text-lg font-bold self-end rotate-180 ${c.suit==='♥'||c.suit==='♦'?'text-red-600':'text-black'}">${c.rank}</div>
         </div>`).join('');
 }
 

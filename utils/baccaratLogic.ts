@@ -1,4 +1,3 @@
-
 import { Card, Suit, Winner, RoundResult } from '../types';
 
 export const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
@@ -36,22 +35,6 @@ export const calculateScore = (cards: Card[]): number => {
   return total % 10;
 };
 
-export const shouldPlayerDraw = (playerScore: number): boolean => {
-  return playerScore <= 5;
-};
-
-export const shouldBankerDraw = (bankerScore: number, playerThirdCardValue?: number): boolean => {
-  if (playerThirdCardValue === undefined) {
-    return bankerScore <= 5;
-  }
-  if (bankerScore <= 2) return true;
-  if (bankerScore === 3) return playerThirdCardValue !== 8;
-  if (bankerScore === 4) return [2, 3, 4, 5, 6, 7].includes(playerThirdCardValue);
-  if (bankerScore === 5) return [4, 5, 6, 7].includes(playerThirdCardValue);
-  if (bankerScore === 6) return [6, 7].includes(playerThirdCardValue);
-  return false;
-};
-
 export const playHand = (shoe: Card[]): { result: RoundResult, usedCards: number } => {
   const playerCards: Card[] = [shoe[0], shoe[2]];
   const bankerCards: Card[] = [shoe[1], shoe[3]];
@@ -60,16 +43,33 @@ export const playHand = (shoe: Card[]): { result: RoundResult, usedCards: number
   let pScore = calculateScore(playerCards);
   let bScore = calculateScore(bankerCards);
 
+  // Baccarat rules for third card
   if (pScore < 8 && bScore < 8) {
     let pThird: Card | undefined;
-    if (shouldPlayerDraw(pScore)) {
+    if (pScore <= 5) {
       pThird = shoe[used++];
       playerCards.push(pThird);
       pScore = calculateScore(playerCards);
     }
-    if (shouldBankerDraw(bScore, pThird?.value)) {
-      bankerCards.push(shoe[used++]);
-      bScore = calculateScore(bankerCards);
+
+    const pv = pThird?.value;
+    if (pv === undefined) {
+      if (bScore <= 5) {
+        bankerCards.push(shoe[used++]);
+        bScore = calculateScore(bankerCards);
+      }
+    } else {
+      // Banker third card rules based on player's third card
+      if (
+        bScore <= 2 ||
+        (bScore === 3 && pv !== 8) ||
+        (bScore === 4 && [2, 3, 4, 5, 6, 7].includes(pv)) ||
+        (bScore === 5 && [4, 5, 6, 7].includes(pv)) ||
+        (bScore === 6 && [6, 7].includes(pv))
+      ) {
+        bankerCards.push(shoe[used++]);
+        bScore = calculateScore(bankerCards);
+      }
     }
   }
 
@@ -78,172 +78,88 @@ export const playHand = (shoe: Card[]): { result: RoundResult, usedCards: number
   else if (bScore > pScore) winner = Winner.Banker;
 
   return {
-    result: {
-      winner,
-      playerScore: pScore,
-      bankerScore: bScore,
-      playerCards: [...playerCards],
-      bankerCards: [...bankerCards],
-      isPairPlayer: playerCards[0].rank === playerCards[1].rank,
-      isPairBanker: bankerCards[0].rank === bankerCards[1].rank,
-    },
+    result: { winner, playerScore: pScore, bankerScore: bScore, playerCards, bankerCards },
     usedCards: used
   };
 };
 
-export interface BigRoadEntry {
-  winner: Winner;
-  ties: number;
-}
-
-export interface PathEntry {
-  r: number;
-  c: number;
-  logicalCol: number;
-  winner: Winner;
-}
+// Road Logic
+export interface BigRoadEntry { winner: Winner; ties: number; }
+export interface PathEntry { r: number; c: number; logicalCol: number; winner: Winner; }
 
 export const generateBigRoad = (history: RoundResult[]) => {
-  const matrix: (BigRoadEntry | null)[][] = Array.from({ length: 6 }, () => Array(250).fill(null));
+  const matrix: (BigRoadEntry | null)[][] = Array.from({ length: 6 }, () => Array(500).fill(null));
   const path: PathEntry[] = [];
-  
-  let col = 0;
-  let row = 0;
-  let streakStartCol = 0;
-  let logicalCol = -1;
-  let lastWinner: Winner | null = null;
-  let isFirstHand = true;
+  let col = 0, row = 0, streakStartCol = 0, logicalCol = -1, lastWinner: Winner | null = null, isFirst = true;
 
   history.forEach((res) => {
     if (res.winner === Winner.Tie) {
       if (path.length > 0) {
         const last = path[path.length - 1];
-        const entry = matrix[last.r][last.c];
-        if (entry) entry.ties++;
+        if (matrix[last.r][last.c]) matrix[last.r][last.c]!.ties++;
       } else {
-        // Tie at start of shoe
-        if (!matrix[0][0]) {
-          matrix[0][0] = { winner: Winner.Tie, ties: 1 };
-          path.push({ r: 0, c: 0, logicalCol: 0, winner: Winner.Tie });
-        } else {
-          matrix[0][0]!.ties++;
-        }
+        if (!matrix[0][0]) matrix[0][0] = { winner: Winner.Tie, ties: 1 };
+        else matrix[0][0]!.ties++;
       }
       return;
     }
-
-    if (isFirstHand) {
+    if (isFirst) {
       logicalCol = 0;
-      if (matrix[0][0] && matrix[0][0].winner === Winner.Tie) {
-        // Replace Tie with first Player/Banker
-        matrix[0][0].winner = res.winner;
-      } else {
-        matrix[0][0] = { winner: res.winner, ties: 0 };
-      }
+      matrix[0][0] = { winner: res.winner, ties: 0 };
       path.push({ r: 0, c: 0, logicalCol: 0, winner: res.winner });
-      lastWinner = res.winner;
-      isFirstHand = false;
-      row = 0;
-      col = 0;
-      streakStartCol = 0;
+      lastWinner = res.winner; isFirst = false;
     } else {
       if (res.winner === lastWinner) {
-        // Streak continues
-        if (row < 5 && matrix[row + 1][col] === null) {
-          row++;
-        } else {
-          col++;
-        }
+        if (row < 5 && matrix[row + 1][col] === null) row++; else col++;
       } else {
-        // Winner change
-        logicalCol++;
-        row = 0;
-        col = streakStartCol + 1;
+        logicalCol++; row = 0; col = streakStartCol + 1;
         while (col < matrix[0].length && matrix[0][col] !== null) col++;
         streakStartCol = col;
       }
-      if (col < matrix[0].length) {
-        matrix[row][col] = { winner: res.winner, ties: 0 };
-        path.push({ r: row, c: col, logicalCol, winner: res.winner });
-      }
+      matrix[row][col] = { winner: res.winner, ties: 0 };
+      path.push({ r: row, c: col, logicalCol, winner: res.winner });
       lastWinner = res.winner;
     }
   });
-
   return { matrix, path };
 };
 
-const getColumnHeight = (matrix: (BigRoadEntry | null)[][], col: number): number => {
-  if (col < 0 || col >= matrix[0].length) return 0;
-  let height = 0;
-  for (let r = 0; r < 6; r++) {
-    if (matrix[r][col] !== null) height++;
-  }
-  return height;
-};
-
 export const generateDerivedRoad = (bigRoadMatrix: (BigRoadEntry | null)[][], path: PathEntry[], offset: number) => {
-  const derivedMatrix: (('red' | 'blue') | null)[][] = Array.from({ length: 6 }, () => Array(250).fill(null));
-  
-  // Filter out ties for derived road calculations
+  const derivedMatrix: (('red' | 'blue') | null)[][] = Array.from({ length: 6 }, () => Array(500).fill(null));
   const validPath = path.filter(p => p.winner !== Winner.Tie);
-  if (validPath.length === 0) return derivedMatrix;
-
-  let dCol = 0;
-  let dRow = 0;
-  let dStreakStartCol = 0;
-  let lastColor: 'red' | 'blue' | null = null;
+  let dCol = 0, dRow = 0, dStreakStartCol = 0, lastColor: 'red' | 'blue' | null = null;
 
   validPath.forEach((current) => {
-    // Derived roads start after a specific number of hands in the Big Road
-    if (current.logicalCol < offset || (current.logicalCol === offset && current.r === 0)) {
-      return;
-    }
+    // Derived roads start after offset columns
+    if (current.logicalCol < offset || (current.logicalCol === offset && current.r === 0)) return;
 
     let color: 'red' | 'blue' = 'blue';
-
     if (current.r > 0) {
-      const idx = current.c - offset;
-      const cellLeft = idx >= 0 ? bigRoadMatrix[current.r][idx] : null;
-      const cellAboveLeft = idx >= 0 ? bigRoadMatrix[current.r - 1][idx] : null;
-      // Rule: Red if symmetry exists, Blue otherwise
-      if ((cellLeft !== null) === (cellAboveLeft !== null)) {
-        color = 'red';
-      } else {
-        color = 'blue';
-      }
+      // Look at the column to the left (current.logicalCol - offset)
+      const targetCol = current.c - offset;
+      const cellLeft = targetCol >= 0 ? bigRoadMatrix[current.r][targetCol] : null;
+      const cellAboveLeft = targetCol >= 0 ? bigRoadMatrix[current.r - 1][targetCol] : null;
+      color = (cellLeft !== null) === (cellAboveLeft !== null) ? 'red' : 'blue';
     } else {
-      const h1 = getColumnHeight(bigRoadMatrix, current.c - 1);
-      const h2 = getColumnHeight(bigRoadMatrix, current.c - 1 - offset);
+      // Comparing column lengths
+      const h1 = [0,1,2,3,4,5].reduce((a, r) => a + (bigRoadMatrix[r][current.c - 1] ? 1 : 0), 0);
+      const h2 = [0,1,2,3,4,5].reduce((a, r) => a + (bigRoadMatrix[r][current.c - 1 - offset] ? 1 : 0), 0);
       color = (h1 === h2) ? 'red' : 'blue';
     }
 
     if (lastColor === null) {
-      dRow = 0;
-      dCol = 0;
-      dStreakStartCol = 0;
-      derivedMatrix[dRow][dCol] = color;
+      derivedMatrix[0][0] = color;
       lastColor = color;
     } else if (color === lastColor) {
-      if (dRow < 5 && derivedMatrix[dRow + 1][dCol] === null) {
-        dRow++;
-      } else {
-        dCol++;
-      }
-      if (dCol < derivedMatrix[0].length) {
-        derivedMatrix[dRow][dCol] = color;
-      }
+      if (dRow < 5 && derivedMatrix[dRow + 1][dCol] === null) dRow++; else dCol++;
+      derivedMatrix[dRow][dCol] = color;
     } else {
-      dRow = 0;
-      dCol = dStreakStartCol + 1;
+      dRow = 0; dCol = dStreakStartCol + 1;
       while (dCol < derivedMatrix[0].length && derivedMatrix[0][dCol] !== null) dCol++;
       dStreakStartCol = dCol;
-      if (dCol < derivedMatrix[0].length) {
-        derivedMatrix[dRow][dCol] = color;
-      }
+      derivedMatrix[0][dCol] = color;
       lastColor = color;
     }
   });
-
   return derivedMatrix;
 };
