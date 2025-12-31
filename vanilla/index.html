@@ -1,20 +1,20 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Baccarat Pro - Vanilla Trainer</title>
+    <title>Stake Baccarat Clone - Vanilla</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%231a4731%22/><text y=%22.82em%22 x=%220.18em%22 font-size=%2270%22 font-weight=%22900%22 fill=%22%23facc15%22 font-family=%22serif%22>B</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Playfair+Display:wght@700&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e5e5e5; }
-        .casino-gradient { background: radial-gradient(circle at center, #1a4731 0%, #0a1f14 100%); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background: #05080a; color: #e5e5e5; overflow: hidden; }
+        .casino-gradient { background: radial-gradient(circle at center, #1a2b33 0%, #0a1217 100%); }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .roadmap-cell { background-color: #171717; display: flex; align-items: center; justify-content: center; position: relative; }
-        #settings-panel.open { transform: translateX(0); }
+        
         @keyframes win-burst {
             0% { transform: scale(0.5); opacity: 0; filter: blur(10px); }
             20% { transform: scale(1.1); opacity: 1; filter: blur(0); }
@@ -22,11 +22,13 @@
             100% { transform: scale(1.2); opacity: 0; }
         }
         .animate-win-burst { animation: win-burst 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
         @keyframes winner-flash {
-            0%, 100% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.03); filter: brightness(1.3); }
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 0px transparent); transform: scale(1); }
+            50% { filter: brightness(1.3) drop-shadow(0 0 15px currentColor); transform: scale(1.05); }
         }
-        .animate-winner-flash { animation: winner-flash 0.6s ease-in-out infinite; }
+        .animate-winner-flash { animation: winner-flash 0.8s ease-in-out 2; }
+        
         .win-splash-text {
             background: linear-gradient(90deg, #facc15, #fef08a, #facc15);
             background-size: 200% auto;
@@ -35,110 +37,124 @@
         }
     </style>
 </head>
-<body class="h-screen overflow-hidden casino-gradient flex flex-col p-1 md:p-3">
-    <div class="h-full flex flex-col max-w-[1600px] mx-auto w-full gap-0.5 md:gap-1">
-        <!-- Header -->
-        <header class="flex-shrink-0 flex items-center justify-between px-2 py-0.5 bg-black/30 rounded border border-white/5 backdrop-blur-sm z-10">
-            <div class="flex items-center gap-2">
-                <h1 class="text-[10px] md:text-xl lg:text-2xl font-black italic tracking-tighter uppercase">BACCARAT<span class="text-yellow-400">PRO</span></h1>
-                <button id="settings-btn" class="p-1 rounded-full bg-white/5 border border-transparent hover:border-white/10 transition-all">
-                    <i class="fas fa-cog text-neutral-400 text-[8px] md:text-base"></i>
+<body class="h-screen flex flex-col overflow-hidden">
+    <div class="h-full flex flex-col w-full">
+        <!-- Header / Table -->
+        <div class="relative h-[55vh] casino-gradient flex flex-col items-center justify-center p-3 border-b border-white/10 shadow-2xl z-10">
+            <div class="absolute top-4 left-6 flex items-center gap-4">
+                <button id="settings-btn" class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-400/20 hover:bg-blue-500/30 transition-all">
+                    <i class="fas fa-cog text-blue-400 text-lg"></i>
                 </button>
+                <div class="text-sm font-black tracking-[0.2em] text-neutral-500 uppercase">STAKE EXTREME</div>
             </div>
-            <div class="flex items-center gap-2">
-                <div class="flex items-center gap-1.5">
-                    <div class="w-10 md:w-20 h-1 bg-neutral-800 rounded-full overflow-hidden">
-                        <div id="shoe-progress" class="h-full bg-emerald-500 transition-all" style="width: 0%"></div>
-                    </div>
-                    <span id="shoe-count" class="text-[7px] md:text-[10px] font-mono text-neutral-500">0/416</span>
-                </div>
-                <button id="new-shoe-btn" class="bg-red-600 px-1.5 py-0.5 rounded text-[7px] md:text-[10px] font-bold uppercase transition-transform active:scale-95">Reset</button>
-            </div>
-        </header>
 
-        <!-- Main Display -->
-        <main class="flex-grow flex flex-col gap-1 overflow-hidden min-h-0">
-            <div class="flex-shrink-0 flex flex-row items-stretch justify-center gap-1 md:gap-4 lg:gap-12 px-1 py-1 md:py-3 bg-black/10 rounded-xl md:rounded-2xl border border-white/5 shadow-2xl">
+            <div id="auto-status" class="absolute top-4 right-6 hidden flex items-center gap-3">
+                <div class="text-xs font-black text-green-500 uppercase tracking-widest animate-pulse">Auto Dealing</div>
+                <div class="w-10 h-10 rounded-full border-2 border-green-500 flex items-center justify-center bg-black/60 shadow-lg shadow-green-500/20">
+                    <span id="timer-display" class="text-sm font-black text-green-500">10</span>
+                </div>
+            </div>
+
+            <div id="initializing-label" class="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 hidden">
+                <div class="text-center animate-pulse">
+                    <p class="text-yellow-400 text-2xl font-black uppercase tracking-widest">Burn Card: <span id="burn-value"></span></p>
+                </div>
+            </div>
+
+            <div class="flex gap-6 md:gap-36 w-full max-w-6xl items-center justify-center mt-4">
                 <!-- Player Hand -->
-                <div class="flex flex-col items-center gap-0.5 flex-1 overflow-hidden">
-                    <h2 class="text-blue-400 font-black tracking-widest uppercase text-[10px] md:text-xl lg:text-2xl">Player</h2>
-                    <div id="player-cards" class="flex flex-wrap gap-0.5 p-1 md:p-3 bg-black/40 rounded-xl border border-white/10 w-full justify-center min-h-[70px] md:min-h-[140px] lg:min-h-[180px] items-center relative shadow-inner overflow-hidden"></div>
-                    <div class="mt-1 bg-black/80 px-2 py-0.5 md:px-6 md:py-1 rounded-full border border-white/20">
-                        <span id="player-score" class="text-sm md:text-2xl lg:text-3xl font-black text-white">0</span>
+                <div id="player-hand-container" class="flex flex-col items-center gap-2 md:gap-4 transition-all">
+                    <div id="player-cards" class="flex flex-col items-center gap-1.5 md:gap-3 min-h-[140px] md:min-h-[220px]"></div>
+                    <div class="relative">
+                        <span class="text-xl md:text-2xl font-black bg-[#1565c0] px-8 md:px-10 py-2 rounded-full shadow-2xl border border-white/30 block">
+                            闲 <span id="player-score">0</span>
+                        </span>
                     </div>
-                </div>
-
-                <!-- Central HUD -->
-                <div class="flex flex-col items-center justify-center min-w-[60px] md:min-w-[180px] lg:min-w-[300px] h-full gap-1 md:gap-4">
-                    <div id="initializing-label" class="hidden text-center animate-pulse"><p class="text-yellow-400 text-[8px] md:text-base lg:text-xl font-bold uppercase">Burn <span id="burn-value"></span></p></div>
-                    <div id="auto-status" class="hidden flex flex-col items-center gap-1">
-                        <div id="timer-display" class="w-8 h-8 md:w-16 lg:w-24 md:h-16 lg:h-24 rounded-full border-2 md:border-4 border-yellow-400 shadow-lg flex items-center justify-center text-xs md:text-2xl lg:text-4xl font-black text-yellow-400 bg-black/60">10</div>
-                        <span class="text-[6px] md:text-[10px] font-black uppercase text-yellow-500/80">Auto</span>
-                    </div>
-                    <div id="result-label" class="hidden text-center px-2 py-1 md:px-6 md:py-2 lg:px-10 lg:py-5 rounded-lg font-black text-[8px] md:text-xl lg:text-3xl shadow-2xl ring-1 md:ring-2 ring-white/20">...</div>
-                    <div id="manual-label" class="text-neutral-500 text-[8px] md:text-sm lg:text-lg font-black uppercase bg-white/5 px-2 py-0.5 md:py-1 rounded-full border border-white/5">Bet</div>
                 </div>
 
                 <!-- Banker Hand -->
-                <div class="flex flex-col items-center gap-0.5 flex-1 overflow-hidden">
-                    <h2 class="text-red-400 font-black tracking-widest uppercase text-[10px] md:text-xl lg:text-2xl">Banker</h2>
-                    <div id="banker-cards" class="flex flex-wrap gap-0.5 p-1 md:p-3 bg-black/40 rounded-xl border border-white/10 w-full justify-center min-h-[70px] md:min-h-[140px] lg:min-h-[180px] items-center relative shadow-inner overflow-hidden"></div>
-                    <div class="mt-1 bg-black/80 px-2 py-0.5 md:px-6 md:py-1 rounded-full border border-white/20">
-                        <span id="banker-score" class="text-sm md:text-2xl lg:text-3xl font-black text-white">0</span>
+                <div id="banker-hand-container" class="flex flex-col items-center gap-2 md:gap-4 transition-all">
+                    <div id="banker-cards" class="flex flex-col items-center gap-1.5 md:gap-3 min-h-[140px] md:min-h-[220px]"></div>
+                    <div class="relative">
+                        <span class="text-xl md:text-2xl font-black bg-[#c62828] px-8 md:px-10 py-2 rounded-full shadow-2xl border border-white/30 block">
+                            庄 <span id="banker-score">0</span>
+                        </span>
                     </div>
                 </div>
             </div>
 
-            <!-- Roadmaps - Condensed for Monitor Height -->
-            <div class="flex-grow min-h-0 flex flex-col gap-0.5 md:gap-1 bg-black/60 p-1 md:p-2 rounded-lg border border-white/5 shadow-2xl overflow-hidden">
-                <div class="flex gap-1 h-16 md:h-32 lg:h-40 flex-shrink-0">
-                    <div class="flex flex-col flex-grow min-w-0">
-                        <h3 class="text-[6px] md:text-[9px] font-bold text-neutral-500 mb-0.5 uppercase tracking-widest">Big Road</h3>
-                        <div id="big-road" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-900 rounded overflow-x-auto scrollbar-hide h-full w-full"></div>
-                    </div>
-                    <div class="hidden sm:flex flex-col w-20 md:w-48 lg:w-56">
-                        <h3 class="text-[6px] md:text-[9px] font-bold text-neutral-500 mb-0.5 uppercase tracking-widest">Bead Plate</h3>
-                        <div id="bead-plate" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-900 rounded overflow-x-auto scrollbar-hide h-full w-full"></div>
-                    </div>
-                </div>
-                <!-- Derived Roads in a row on all devices -->
-                <div class="grid grid-cols-3 gap-1 overflow-hidden h-12 md:h-20 lg:h-28 flex-shrink-0">
-                    <div class="flex flex-col"><h3 class="text-[5px] md:text-[8px] font-bold text-neutral-500 uppercase truncate">Big Eye</h3><div id="big-eye-boy" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-900 h-full overflow-x-auto scrollbar-hide"></div></div>
-                    <div class="flex flex-col"><h3 class="text-[5px] md:text-[8px] font-bold text-neutral-500 uppercase truncate">Small</h3><div id="small-road" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-900 h-full overflow-x-auto scrollbar-hide"></div></div>
-                    <div class="flex flex-col"><h3 class="text-[5px] md:text-[8px] font-bold text-neutral-500 uppercase truncate">Cockroach</h3><div id="cockroach-road" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-900 h-full overflow-x-auto scrollbar-hide"></div></div>
-                </div>
+            <!-- Action Button -->
+            <div id="deal-button-container" class="absolute bottom-4 md:bottom-8 w-full flex flex-col items-center justify-center hidden">
+                <button id="deal-btn" class="bg-yellow-500 hover:bg-yellow-400 text-black px-16 py-4 rounded-2xl font-black text-2xl uppercase tracking-[0.1em] transition-all active:scale-95 shadow-2xl shadow-yellow-500/20">
+                    Deal
+                </button>
             </div>
+        </div>
 
-            <!-- Control Bar - Sized for perfect fit -->
-            <div class="mt-auto relative flex flex-col gap-1 flex-shrink-0">
-                <div id="deal-button-container" class="absolute -top-10 left-1/2 -translate-x-1/2 z-20 hidden">
-                    <button id="deal-btn" class="bg-yellow-500 hover:bg-yellow-400 text-black px-8 py-2 md:px-16 md:py-4 rounded-lg md:rounded-xl font-black text-xs md:text-2xl uppercase shadow-xl border-b-2 md:border-b-4 border-yellow-700 active:translate-y-1">Deal</button>
+        <!-- Roadmap -->
+        <div class="flex-grow min-h-0 relative bg-[#050a0e]">
+            <div id="roadmap-wrapper" class="w-full h-full flex flex-col">
+                <div class="flex items-center gap-3 px-2 py-0.5 bg-black/80 text-[8px] font-black text-neutral-500 border-b border-white/5">
+                    <span id="shoe-count" class="opacity-40">#0</span>
+                    <div class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#1565c0]"></span> <span id="stats-p">0</span></div>
+                    <div class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#c62828]"></span> <span id="stats-b">0</span></div>
+                    <div class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#2e7d32]"></span> <span id="stats-t">0</span></div>
                 </div>
-                <!-- Betting Areas - Shorter by ~30% -->
-                <div class="grid grid-cols-5 gap-1 h-10 md:h-24 lg:h-28" id="betting-areas"></div>
-                <div class="bg-black/50 p-1 md:p-3 lg:p-4 rounded-xl border border-white/10 flex items-center justify-between gap-2 shadow-2xl backdrop-blur-md">
-                    <div class="flex items-center gap-2">
-                        <button id="clear-btn" class="px-1.5 py-1 bg-neutral-800 border border-white/10 text-neutral-400 text-[8px] md:text-[10px] font-black uppercase rounded hover:bg-neutral-700 transition-colors">Recall</button>
-                        <div id="chip-selection" class="flex gap-1 md:gap-4"></div>
-                    </div>
-                    <div class="flex flex-col items-end">
-                        <span class="text-neutral-500 text-[6px] md:text-[10px] uppercase font-bold">Bankroll</span>
-                        <span id="balance-display" class="text-sm md:text-2xl lg:text-4xl font-black text-yellow-400 leading-none">$10,000</span>
-                    </div>
+                <div class="flex-grow overflow-y-auto scrollbar-hide bg-[#0d161d]">
+                    <div id="big-road" class="grid grid-rows-6 grid-flow-col bg-black/20 overflow-x-auto scrollbar-hide w-full content-start border-b border-white/5"></div>
+                    <div id="big-eye-boy" class="grid grid-rows-6 grid-flow-col bg-black/10 overflow-x-auto scrollbar-hide w-full content-start border-b border-white/5"></div>
+                    <div id="small-road" class="grid grid-rows-6 grid-flow-col bg-black/10 overflow-x-auto scrollbar-hide w-full content-start border-b border-white/5"></div>
+                    <div id="cockroach-road" class="grid grid-rows-6 grid-flow-col bg-black/10 overflow-x-auto scrollbar-hide w-full content-start"></div>
                 </div>
             </div>
-        </main>
-        <footer class="text-center text-neutral-600 text-[6px] md:text-[8px] uppercase font-bold tracking-widest pb-1">
-            Training Mode Only • 8-Deck Shoe • Standard Rules
-        </footer>
+        </div>
+
+        <!-- Betting Table -->
+        <div class="w-full bg-[#0f212e] p-2 md:p-3 flex flex-col gap-2 md:gap-4 rounded-t-3xl shadow-inner border-t border-white/5 z-20">
+            <div class="flex gap-2 h-24 md:h-32" id="betting-areas"></div>
+            <div class="flex items-center justify-between px-1 md:px-2 pb-2 md:pb-4">
+                <div class="flex flex-col items-start min-w-[50px]">
+                    <span class="text-[8px] text-neutral-500 uppercase font-bold tracking-widest">余额</span>
+                    <span id="balance-display" class="text-sm md:text-lg font-black text-white">$10,000</span>
+                </div>
+                <div class="flex gap-2 items-center">
+                    <button id="clear-btn" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-neutral-400 hover:text-white transition-colors">
+                        <i class="fas fa-undo text-xs"></i>
+                    </button>
+                    <div id="chip-selection" class="flex gap-1.5 md:gap-2 bg-black/20 p-1 rounded-full border border-white/5"></div>
+                </div>
+                <div class="flex flex-col items-end min-w-[50px]">
+                    <span class="text-[8px] text-neutral-500 uppercase font-bold tracking-widest">总下注</span>
+                    <span id="total-bet-display" class="text-sm md:text-lg font-black text-yellow-500">$0</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Settings Panel -->
-    <div id="settings-panel" class="fixed top-0 right-0 h-full w-[250px] bg-neutral-900/98 border-l border-white/10 z-[110] transform translate-x-full transition-transform duration-300 p-6 backdrop-blur-xl">
-        <div class="flex items-center justify-between mb-8"><h3 class="text-sm font-black text-neutral-400 uppercase">Settings</h3><button id="settings-close" class="text-neutral-500"><i class="fas fa-times"></i></button></div>
-        <div class="space-y-8">
-            <div><label class="text-[10px] font-bold text-neutral-500 uppercase mb-2 block">Deal Mode</label><div class="flex bg-black/40 p-1 rounded-lg border border-white/5"><button id="mode-auto" class="flex-1 py-1 rounded text-xs">Auto</button><button id="mode-manual" class="flex-1 py-1 rounded text-xs">Manual</button></div></div>
-            <div id="interval-panel" class="opacity-40 pointer-events-none"><label class="text-[10px] font-bold text-neutral-500 uppercase mb-2 block">Interval</label><div class="grid grid-cols-3 gap-1" id="interval-btns"><button data-sec="1" class="py-1 rounded bg-white/5 text-[10px]">1s</button><button data-sec="5" class="py-1 rounded bg-white/5 text-[10px]">5s</button><button data-sec="10" class="py-1 rounded bg-white/5 text-[10px]">10s</button></div></div>
+    <div id="settings-panel" class="fixed inset-0 z-[110] bg-black/80 backdrop-blur-md flex items-center justify-center p-6 hidden">
+        <div class="bg-[#1a2b33] border border-white/10 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-xl font-black uppercase tracking-widest text-white">Settings</h3>
+                <button id="settings-close" class="text-neutral-500 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="space-y-8">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-bold text-neutral-400 uppercase">Auto Deal</span>
+                    <button id="mode-auto" class="w-14 h-8 rounded-full transition-colors relative bg-neutral-800">
+                        <div id="auto-toggle-knob" class="absolute top-1 w-6 h-6 rounded-full bg-white transition-all left-1"></div>
+                    </button>
+                </div>
+                <div id="interval-panel" class="opacity-40 pointer-events-none">
+                    <span class="text-sm font-bold text-neutral-400 uppercase mb-3 block">Interval (seconds)</span>
+                    <div class="grid grid-cols-3 gap-2" id="interval-btns">
+                        <button data-sec="2" class="py-3 rounded-xl font-black bg-black/40 border border-white/5 text-white">2s</button>
+                        <button data-sec="5" class="py-3 rounded-xl font-black bg-black/40 border border-white/5 text-white">5s</button>
+                        <button data-sec="10" class="py-3 rounded-xl font-black bg-black/40 border border-white/5 text-white">10s</button>
+                    </div>
+                </div>
+                <button id="reset-shoe-btn" class="w-full py-3 bg-red-600/20 border border-red-500/30 rounded-xl text-red-500 font-black uppercase">New Shoe</button>
+            </div>
         </div>
     </div>
 
