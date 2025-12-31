@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, RoundResult, Winner, BetTarget, Suit } from './types';
 import { createShoe, playHand } from './utils/baccaratLogic';
 import { Roadmap } from './components/Roadmap';
@@ -23,7 +23,6 @@ const WinSplash: React.FC<{ amount: number; onComplete: () => void }> = ({ amoun
 
 const CardUI: React.FC<{ card: Card }> = ({ card }) => {
   const isRed = card.suit === Suit.Hearts || card.suit === Suit.Diamonds;
-  // Use explicit aspect-ratio to ensure it's never stretched, even on mobile
   return (
     <div className="w-12 h-auto aspect-[2.5/3.5] md:w-32 bg-white rounded-lg shadow-2xl flex flex-col p-1.5 md:p-2 transition-all border border-neutral-300">
       <div className="text-sm md:text-3xl font-bold leading-none text-black/90">
@@ -44,8 +43,12 @@ const SettingsModal: React.FC<{
   onToggleAuto: (val: boolean) => void;
   interval: number;
   onIntervalChange: (val: number) => void;
-}> = ({ isOpen, onClose, isAutoDeal, onToggleAuto, interval, onIntervalChange }) => {
+  onNewShoe: () => void;
+}> = ({ isOpen, onClose, isAutoDeal, onToggleAuto, interval, onIntervalChange, onNewShoe }) => {
+  const [confirmReset, setConfirmReset] = useState(false);
+
   if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
       <div className="bg-[#1a2b33] border border-white/10 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
@@ -79,6 +82,32 @@ const SettingsModal: React.FC<{
               ))}
             </div>
           </div>
+
+          <div className="pt-4 border-t border-white/5">
+            {!confirmReset ? (
+              <button 
+                onClick={() => setConfirmReset(true)}
+                className="w-full py-3 bg-red-600/10 border border-red-500/30 rounded-xl text-red-500 font-black uppercase tracking-widest hover:bg-red-600/20 transition-all"
+              >
+                New Shoe & Reset Bankroll
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => { onNewShoe(); setConfirmReset(false); onClose(); }}
+                  className="flex-1 py-3 bg-red-600 rounded-xl text-white font-black uppercase tracking-widest"
+                >
+                  Confirm?
+                </button>
+                <button 
+                  onClick={() => setConfirmReset(false)}
+                  className="flex-1 py-3 bg-neutral-700 rounded-xl text-white font-black uppercase tracking-widest"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -90,26 +119,37 @@ const App: React.FC = () => {
   const [history, setHistory] = useState<RoundResult[]>([]);
   const [balance, setBalance] = useState(1000);
   const [currentBets, setCurrentBets] = useState<Map<BetTarget, number>>(new Map());
-  const [gameState, setGameState] = useState<'betting' | 'dealing' | 'result' | 'initializing'>('initializing');
+  const [gameState, setGameState] = useState<'betting' | 'dealing' | 'result' | 'initializing' | 'shoeEnd'>('initializing');
   const [lastRound, setLastRound] = useState<RoundResult | null>(null);
   const [payoutWin, setPayoutWin] = useState<number | null>(null);
+  const [initMessage, setInitMessage] = useState<string>('Initializing Shoe...');
   
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isAutoDeal, setIsAutoDeal] = useState(false);
   const [dealInterval, setDealInterval] = useState(5);
   const [countdown, setCountdown] = useState(0);
 
-  const startNewShoe = useCallback(() => {
+  const startNewShoe = useCallback((resetBalance = true) => {
     setHistory([]);
     setLastRound(null);
     setCurrentBets(new Map());
     setGameState('initializing');
+    if (resetBalance) setBalance(1000);
+    
     const newShoe = createShoe(8);
+    const firstCard = newShoe[0];
+    // Burn card rule: First card determines number of cards to burn. 
+    // Face cards (10, J, Q, K) = 10. Ace = 1.
+    const burnCount = firstCard.value === 0 ? 10 : firstCard.value;
+    
+    setInitMessage(`Burn Card: ${firstCard.rank}${firstCard.suit} - Discarding ${burnCount} cards`);
+
     setTimeout(() => {
-      setShoe(newShoe.slice(10));
+      // Discard burn card (1) + burnCount cards
+      setShoe(newShoe.slice(burnCount + 1));
       setGameState('betting');
       if (isAutoDeal) setCountdown(dealInterval);
-    }, 1500);
+    }, 2500);
   }, [isAutoDeal, dealInterval]);
 
   useEffect(() => { startNewShoe(); }, []);
@@ -161,12 +201,12 @@ const App: React.FC = () => {
     setTimeout(() => {
       setLastRound(result);
       setHistory(prev => [...prev, result]);
-      setShoe(prev => prev.slice(usedCards));
+      const nextShoe = shoe.slice(usedCards);
+      setShoe(nextShoe);
       
       let payout = 0;
       currentBets.forEach((amt, target) => {
         if (target === BetTarget.Player && result.winner === Winner.Player) payout += amt * 2;
-        // Banker payout updated to 1:1 for training purposes (was amt * 1.95)
         if (target === BetTarget.Banker && result.winner === Winner.Banker) payout += amt * 2;
         if (result.winner === Winner.Tie) payout += amt;
       });
@@ -177,8 +217,13 @@ const App: React.FC = () => {
 
       setTimeout(() => {
         setCurrentBets(new Map());
-        setGameState('betting');
-        if (isAutoDeal) setCountdown(dealInterval);
+        
+        if (nextShoe.length < 15) {
+          setGameState('shoeEnd');
+        } else {
+          setGameState('betting');
+          if (isAutoDeal) setCountdown(dealInterval);
+        }
       }, 3000);
     }, 800);
   };
@@ -189,7 +234,6 @@ const App: React.FC = () => {
   const renderHand = (title: string, cards: Card[] | undefined, score: number | undefined, colorClass: string, isWinner: boolean) => (
     <div className={`flex flex-col items-center gap-2 md:gap-4 transition-all ${isWinner ? 'animate-winner-flash' : ''}`}>
       <div className="flex flex-col items-center gap-1.5 md:gap-3">
-        {/* Row 1: First 2 Cards */}
         <div className="flex gap-2">
           {cards ? (
             cards.slice(0, 2).map((c, i) => <CardUI key={i} card={c} />)
@@ -200,12 +244,11 @@ const App: React.FC = () => {
             </>
           )}
         </div>
-        {/* Row 2: Third Card (Stacked Below) */}
-        <div className="w-12 md:w-32 aspect-[2.5/3.5] flex items-center justify-center">
+        <div className="flex items-center justify-center h-20 md:h-46">
           {cards && cards[2] ? (
             <CardUI card={cards[2]} />
           ) : (
-            <div className="w-full h-full bg-transparent" /> /* Spacer to maintain height and ratio */
+            <div className="w-12 md:w-32 aspect-[2.5/3.5] bg-transparent" />
           )}
         </div>
       </div>
@@ -226,11 +269,11 @@ const App: React.FC = () => {
         onToggleAuto={(v) => { setIsAutoDeal(v); if (v && gameState === 'betting') setCountdown(dealInterval); }}
         interval={dealInterval}
         onIntervalChange={setDealInterval}
+        onNewShoe={() => startNewShoe(true)}
       />
       
       {payoutWin !== null && <WinSplash amount={payoutWin} onComplete={() => setPayoutWin(null)} />}
 
-      {/* Top Section: Table and Hands Display */}
       <div className="relative h-[55vh] md:h-[50vh] bg-gradient-to-b from-[#1a2b33] to-[#0a1217] flex flex-col items-center justify-center p-3 border-b border-white/10 shadow-2xl z-10">
         <div className="absolute top-4 left-6 flex items-center gap-4">
           <button onClick={() => setIsSettingsOpen(true)} className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-400/20 hover:bg-blue-500/30 transition-all">
@@ -248,12 +291,37 @@ const App: React.FC = () => {
           </div>
         )}
 
+        {gameState === 'initializing' && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="text-center animate-pulse">
+              <p className="text-yellow-400 text-2xl font-black uppercase tracking-widest">{initMessage}</p>
+            </div>
+          </div>
+        )}
+
+        {gameState === 'shoeEnd' && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md px-6">
+            <div className="bg-[#1a2b33] border border-white/10 p-8 rounded-3xl shadow-2xl text-center max-w-sm">
+              <div className="w-20 h-20 bg-yellow-500/10 border border-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                 <i className="fas fa-redo text-yellow-500 text-3xl"></i>
+              </div>
+              <h2 className="text-2xl font-black uppercase tracking-widest text-white mb-2">End of Shoe</h2>
+              <p className="text-neutral-400 text-sm mb-8 leading-relaxed">The current shoe has finished. Start a fresh 8-deck shoe to continue training.</p>
+              <button 
+                onClick={() => startNewShoe(true)}
+                className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black py-4 rounded-xl uppercase tracking-widest transition-all active:scale-95 shadow-xl shadow-yellow-500/20"
+              >
+                New Shoe
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="flex gap-6 md:gap-36 w-full max-w-6xl items-center justify-center mt-4">
           {renderHand('闲', lastRound?.playerCards, lastRound?.playerScore, 'bg-[#1565c0]', isPlayerWinner)}
           {renderHand('庄', lastRound?.bankerCards, lastRound?.bankerScore, 'bg-[#c62828]', isBankerWinner)}
         </div>
 
-        {/* Action Button */}
         <div className="absolute bottom-4 md:bottom-8 w-full flex flex-col items-center justify-center">
           {gameState === 'betting' && !isAutoDeal && (
              <button 
@@ -266,12 +334,10 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Middle: Roadmap Area */}
       <div className="flex-grow min-h-0 relative">
         <Roadmap history={history} />
       </div>
 
-      {/* Bottom: Betting Table */}
       <div className="flex-shrink-0 z-20">
         <BettingTable 
           balance={balance} 

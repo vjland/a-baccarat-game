@@ -47,7 +47,7 @@ export const Roadmap: React.FC<RoadmapProps> = ({ history }) => {
     <div className="flex flex-col w-full bg-[#050a0e] p-0 gap-0 h-full min-h-0 overflow-hidden">
       {/* Top Section: Statistics Bar - Compact */}
       <div className="flex items-center gap-3 px-2 py-0.5 bg-black/80 text-[8px] font-black text-neutral-500 border-b border-white/5">
-        <span className="opacity-40">#{stats.total}</span>
+        <span className="text-yellow-400">#{stats.total} HANDS</span>
         <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#1565c0]" /> {stats.p}</div>
         <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#c62828]" /> {stats.b}</div>
         <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#2e7d32]" /> {stats.t}</div>

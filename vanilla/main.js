@@ -1,3 +1,4 @@
+
 import { createShoe, playHand, Winner, BetTarget, generateBigRoad, generateDerivedRoad, Suit } from './logic.js';
 
 // State
@@ -33,38 +34,56 @@ const el = {
   winSplashLayer: document.getElementById('win-splash-layer'),
   roadmapContainer: document.getElementById('roadmap-container'),
   bettingTableContainer: document.getElementById('betting-table-container'),
+  initLabel: document.getElementById('initializing-label'),
+  initMessage: document.getElementById('init-message'),
+  resetContainer: document.getElementById('reset-container'),
+  shoeEndOverlay: document.getElementById('shoe-end-overlay'),
+  newShoeConfirmBtn: document.getElementById('new-shoe-confirm-btn')
 };
 
 // Initialization
 function init() {
-  startNewShoe();
+  startNewShoe(true);
   setupEventListeners();
-  renderBettingTable();
+  el.newShoeConfirmBtn.onclick = () => startNewShoe(true);
 }
 
-function startNewShoe() {
+function startNewShoe(resetBalance = false) {
   history = [];
   lastRound = null;
   currentBets.clear();
   gameState = 'initializing';
+  if (resetBalance) balance = 1000;
+  
+  el.shoeEndOverlay.classList.add('hidden');
+  
   shoe = createShoe(8);
+  const firstCard = shoe[0];
+  const burnCount = firstCard.value === 0 ? 10 : firstCard.value;
+  
+  el.initMessage.textContent = `Burn Card: ${firstCard.rank}${firstCard.suit} - Discarding ${burnCount} cards`;
+  el.initLabel.classList.remove('hidden');
   
   setTimeout(() => {
-    shoe = shoe.slice(10);
+    shoe = shoe.slice(burnCount + 1);
     gameState = 'betting';
+    el.initLabel.classList.add('hidden');
     if (isAutoDeal) {
       countdown = dealInterval;
       startAutoCountdown();
     }
     updateUI();
-  }, 1500);
+  }, 2500);
 }
 
 // Event Listeners
 function setupEventListeners() {
   el.dealButton.onclick = handleDeal;
   el.openSettings.onclick = () => el.settingsModal.classList.remove('hidden');
-  el.closeSettings.onclick = () => el.settingsModal.classList.add('hidden');
+  el.closeSettings.onclick = () => {
+    el.settingsModal.classList.add('hidden');
+    renderResetButton(); // Reset confirmation state
+  };
   
   el.toggleAuto.onclick = () => {
     isAutoDeal = !isAutoDeal;
@@ -100,6 +119,34 @@ function setupEventListeners() {
       }
     };
   });
+
+  renderResetButton();
+}
+
+function renderResetButton() {
+  el.resetContainer.innerHTML = `
+    <button id="new-shoe-btn" class="w-full py-3 bg-red-600/10 border border-red-500/30 rounded-xl text-red-500 font-black uppercase tracking-widest hover:bg-red-600/20 transition-all">
+        New Shoe & Reset Bankroll
+    </button>
+  `;
+  document.getElementById('new-shoe-btn').onclick = () => {
+    el.resetContainer.innerHTML = `
+      <div class="flex gap-2">
+          <button id="confirm-reset-btn" class="flex-1 py-3 bg-red-600 rounded-xl text-white font-black uppercase tracking-widest">
+              Confirm?
+          </button>
+          <button id="cancel-reset-btn" class="flex-1 py-3 bg-neutral-700 rounded-xl text-white font-black uppercase tracking-widest">
+              Cancel
+          </button>
+      </div>
+    `;
+    document.getElementById('confirm-reset-btn').onclick = () => {
+      startNewShoe(true);
+      el.settingsModal.classList.add('hidden');
+      renderResetButton();
+    };
+    document.getElementById('cancel-reset-btn').onclick = renderResetButton;
+  };
 }
 
 let countdownInterval = null;
@@ -145,12 +192,17 @@ function handleDeal() {
 
     setTimeout(() => {
       currentBets.clear();
-      gameState = 'betting';
-      if (isAutoDeal) {
-        countdown = dealInterval;
-        startAutoCountdown();
+      if (shoe.length < 15) {
+        gameState = 'shoeEnd';
+        el.shoeEndOverlay.classList.remove('hidden');
+      } else {
+        gameState = 'betting';
+        if (isAutoDeal) {
+          countdown = dealInterval;
+          startAutoCountdown();
+        }
+        updateUI();
       }
-      updateUI();
     }, 3000);
   }, 800);
 }
@@ -190,7 +242,9 @@ function renderHand(container, cards) {
         <div class="w-12 md:w-32 aspect-[2.5/3.5] bg-white/5 border border-white/10 rounded-lg shadow-inner"></div>
         <div class="w-12 md:w-32 aspect-[2.5/3.5] bg-white/5 border border-white/10 rounded-lg shadow-inner"></div>
       </div>
-      <div class="w-12 md:w-32 aspect-[2.5/3.5] bg-transparent"></div>
+      <div class="flex items-center justify-center h-20 md:h-46">
+        <div class="w-12 md:w-32 aspect-[2.5/3.5] bg-transparent"></div>
+      </div>
     `;
     return;
   }
@@ -198,9 +252,14 @@ function renderHand(container, cards) {
   const row1 = `<div class="flex gap-2">${cards.slice(0, 2).map(createCardHTML).join('')}</div>`;
   const row2 = cards[2] 
     ? `<div class="w-12 md:w-32 aspect-[2.5/3.5] flex items-center justify-center">${createCardHTML(cards[2])}</div>`
-    : `<div class="w-full h-full bg-transparent aspect-[2.5/3.5] md:w-32"></div>`;
+    : `<div class="w-12 md:w-32 aspect-[2.5/3.5] bg-transparent"></div>`;
     
-  container.innerHTML = `${row1}${row2}`;
+  container.innerHTML = `
+    ${row1}
+    <div class="flex items-center justify-center h-20 md:h-46">
+      ${row2}
+    </div>
+  `;
 }
 
 function updateUI() {
@@ -240,7 +299,7 @@ function renderRoadmap() {
   let roadmapHTML = `
     <div class="flex flex-col w-full bg-[#050a0e] p-0 gap-0 h-full min-h-0 overflow-hidden">
       <div class="flex items-center gap-3 px-2 py-0.5 bg-black/80 text-[8px] font-black text-neutral-500 border-b border-white/5">
-        <span class="opacity-40">#${stats.total}</span>
+        <span class="text-yellow-400">#${stats.total} HANDS</span>
         <div class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#1565c0]"></span> ${stats.p}</div>
         <div class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#c62828]"></span> ${stats.b}</div>
         <div class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#2e7d32]"></span> ${stats.t}</div>
