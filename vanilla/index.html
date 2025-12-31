@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,10 +45,37 @@
         #settings-panel.open {
             transform: translateX(0);
         }
+        .win-splash-text {
+            background: linear-gradient(90deg, #facc15, #fef08a, #facc15);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+        @keyframes shine {
+            0% { background-position: -200% center; }
+            100% { background-position: center; }
+        }
+        @keyframes win-burst {
+            0% { transform: scale(0.5); opacity: 0; filter: blur(10px); }
+            20% { transform: scale(1.1); opacity: 1; filter: blur(0); }
+            80% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+        .animate-win-burst {
+            animation: win-burst 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes winner-flash {
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.05); filter: brightness(1.4); }
+        }
+        .animate-winner-flash {
+            animation: winner-flash 0.6s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="min-h-screen casino-gradient overflow-x-hidden">
-    <div id="app" class="min-h-screen flex flex-col p-2 md:p-4 relative max-w-7xl mx-auto w-full">
+    <div id="app" class="min-h-screen flex flex-col p-2 md:p-4 relative max-w-[1600px] mx-auto w-full">
         <!-- New Shoe Confirmation Modal -->
         <div id="modal-container" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
             <div class="bg-neutral-900 border border-white/10 p-6 rounded-2xl max-w-sm w-full shadow-2xl">
@@ -93,21 +119,15 @@
         </div>
 
         <!-- Header -->
-        <header class="flex items-center justify-between gap-2 px-2 py-1 mb-4 bg-black/30 rounded-lg border border-white/5 backdrop-blur-sm relative z-10">
+        <header class="flex-shrink-0 flex items-center justify-between gap-2 px-2 py-1 mb-2 bg-black/30 rounded-lg border border-white/5 backdrop-blur-sm relative z-10">
             <div class="flex items-center gap-3">
                 <h1 class="text-xl md:text-2xl font-black italic tracking-tighter uppercase">
                     Baccarat<span class="text-yellow-400">Pro</span>
                 </h1>
                 <div class="h-6 w-px bg-white/10 hidden md:block"></div>
-                
                 <button id="settings-btn" class="p-2 rounded-full bg-white/5 border border-transparent hover:border-white/10 transition-all">
                     <i class="fas fa-cog text-neutral-400"></i>
                 </button>
-
-                <div id="auto-status" class="hidden flex items-center gap-2">
-                    <div id="timer-display" class="w-8 h-8 rounded-full border-2 border-yellow-400 flex items-center justify-center text-sm font-bold text-yellow-400 bg-black/40 shadow-lg">10</div>
-                    <span class="text-[10px] font-black uppercase tracking-tighter text-yellow-500/80">Auto Dealing...</span>
-                </div>
             </div>
 
             <div class="flex items-center gap-4">
@@ -124,34 +144,42 @@
             </div>
         </header>
 
-        <!-- Main Gameplay -->
-        <main class="flex-grow flex flex-col gap-6 w-full mb-4">
-            <div class="flex flex-row items-center justify-center gap-2 md:gap-8 px-2 mt-4">
+        <!-- Main Gameplay - Doubled Section -->
+        <main class="flex-grow flex flex-col gap-4 w-full mb-4 overflow-hidden">
+            <div class="flex-shrink-0 flex flex-row items-stretch justify-center gap-2 md:gap-12 px-2 py-6 bg-black/10 rounded-2xl border border-white/5 shadow-2xl">
                 <!-- Player Hand -->
                 <div class="flex flex-col items-center gap-1 flex-1">
-                    <h2 class="text-blue-400 font-black tracking-widest uppercase text-xs md:text-sm">Player</h2>
-                    <div id="player-cards" class="flex flex-wrap gap-1 p-2 md:p-4 bg-black/40 rounded-xl border border-white/10 w-full justify-center transition-all min-h-[80px] md:min-h-[140px] items-center shadow-inner"></div>
-                    <div class="mt-1 bg-black/80 px-4 py-0.5 rounded-full border border-white/20">
-                        <span id="player-score" class="text-lg md:text-2xl font-black text-white">0</span>
+                    <h2 class="text-blue-400 font-black tracking-widest uppercase text-xs md:text-3xl">Player</h2>
+                    <div id="player-cards" class="flex flex-wrap gap-1 p-2 md:p-6 bg-black/40 rounded-2xl border border-white/10 w-full justify-center transition-all min-h-[140px] md:min-h-[320px] items-center shadow-inner relative"></div>
+                    <div class="mt-2 bg-black/80 px-4 py-1 md:px-8 md:py-2 rounded-full border border-white/20">
+                        <span id="player-score" class="text-xl md:text-5xl font-black text-white">0</span>
                     </div>
                 </div>
 
-                <!-- Game Result Display -->
-                <div class="flex flex-col items-center justify-center min-w-[80px] md:min-w-[150px]">
+                <!-- Central Control (Timer & Result) -->
+                <div class="flex flex-col items-center justify-center min-w-[100px] md:min-w-[300px] h-full gap-6">
                     <div id="initializing-label" class="hidden text-center animate-pulse">
-                        <p class="text-yellow-400 text-[10px] md:text-xs font-bold uppercase tracking-tighter">Burning <span id="burn-value">0</span></p>
+                        <p class="text-yellow-400 text-sm md:text-xl font-bold uppercase tracking-tighter">Burning <span id="burn-value">0</span></p>
                     </div>
-                    <div id="result-label" class="text-center px-4 py-2 rounded-lg font-black text-xs md:text-lg transition-all shadow-xl ring-1 ring-white/10 bg-white/5 text-white/20">
+
+                    <div id="auto-status" class="hidden flex flex-col items-center gap-2 animate-in fade-in zoom-in duration-300">
+                        <div id="timer-display" class="w-16 h-16 md:w-24 md:h-24 rounded-full border-4 border-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.4)] flex items-center justify-center text-xl md:text-4xl font-black text-yellow-400 bg-black/60">10</div>
+                        <span class="text-[10px] md:text-sm font-black uppercase tracking-widest text-yellow-500/80">Auto Dealing</span>
+                    </div>
+
+                    <div id="result-label" class="hidden text-center px-4 py-2 md:px-10 md:py-5 rounded-xl font-black text-sm md:text-3xl transition-all shadow-2xl ring-2 ring-white/20 bg-white/5 text-white/20">
                         ...
                     </div>
+                    
+                    <div id="manual-label" class="text-neutral-500 text-xs md:text-lg font-black uppercase tracking-widest bg-white/5 px-6 py-2 rounded-full border border-white/5">Place Bets</div>
                 </div>
 
                 <!-- Banker Hand -->
                 <div class="flex flex-col items-center gap-1 flex-1">
-                    <h2 class="text-red-400 font-black tracking-widest uppercase text-xs md:text-sm">Banker</h2>
-                    <div id="banker-cards" class="flex flex-wrap gap-1 p-2 md:p-4 bg-black/40 rounded-xl border border-white/10 w-full justify-center transition-all min-h-[80px] md:min-h-[140px] items-center shadow-inner"></div>
-                    <div class="mt-1 bg-black/80 px-4 py-0.5 rounded-full border border-white/20">
-                        <span id="banker-score" class="text-lg md:text-2xl font-black text-white">0</span>
+                    <h2 class="text-red-400 font-black tracking-widest uppercase text-xs md:text-3xl">Banker</h2>
+                    <div id="banker-cards" class="flex flex-wrap gap-1 p-2 md:p-6 bg-black/40 rounded-2xl border border-white/10 w-full justify-center transition-all min-h-[140px] md:min-h-[320px] items-center shadow-inner relative"></div>
+                    <div class="mt-2 bg-black/80 px-4 py-1 md:px-8 md:py-2 rounded-full border border-white/20">
+                        <span id="banker-score" class="text-xl md:text-5xl font-black text-white">0</span>
                     </div>
                 </div>
             </div>
@@ -161,13 +189,13 @@
                 <div class="flex gap-2 h-36 md:h-40">
                     <div class="flex flex-col flex-grow min-w-0">
                         <h3 class="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-widest flex items-center gap-2">
-                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-500/50"></span> Big Road (大路)
+                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-500/50"></span> Big Road
                         </h3>
                         <div id="big-road" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-800 p-px rounded border border-neutral-700 overflow-x-auto h-full scrollbar-hide"></div>
                     </div>
                     <div class="hidden lg:flex flex-col w-72">
                         <h3 class="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-widest flex items-center gap-2">
-                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-500/50"></span> Bead Plate (珠盘路)
+                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-500/50"></span> Bead Plate
                         </h3>
                         <div id="bead-plate" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-800 p-px rounded border border-neutral-700 overflow-x-auto h-full scrollbar-hide"></div>
                     </div>
@@ -175,19 +203,19 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <div>
                         <h3 class="text-[9px] font-bold text-neutral-500 mb-1 uppercase tracking-widest flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full border-[1.5px] border-red-500/50"></span> Big Eye Boy (大眼仔)
+                            <span class="w-2.5 h-2.5 rounded-full border-[1.5px] border-red-500/50"></span> Big Eye Boy
                         </h3>
                         <div id="big-eye-boy" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-800 p-px rounded border border-neutral-700 h-20 md:h-24 overflow-x-auto scrollbar-hide"></div>
                     </div>
                     <div>
                         <h3 class="text-[9px] font-bold text-neutral-500 mb-1 uppercase tracking-widest flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-red-500/50"></span> Small Road (小路)
+                            <span class="w-2 h-2 rounded-full bg-red-500/50"></span> Small Road
                         </h3>
                         <div id="small-road" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-800 p-px rounded border border-neutral-700 h-20 md:h-24 overflow-x-auto scrollbar-hide"></div>
                     </div>
                     <div>
                         <h3 class="text-[9px] font-bold text-neutral-500 mb-1 uppercase tracking-widest flex items-center gap-2">
-                            <span class="w-2.5 h-[1.5px] bg-red-500/50 rotate-45"></span> Cockroach Road (曱甴路)
+                            <span class="w-2.5 h-[1.5px] bg-red-500/50 rotate-45"></span> Cockroach Road
                         </h3>
                         <div id="cockroach-road" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-800 p-px rounded border border-neutral-700 h-20 md:h-24 overflow-x-auto scrollbar-hide"></div>
                     </div>
@@ -197,7 +225,7 @@
             <!-- Betting Controls -->
             <div class="mt-auto relative w-full">
                 <div id="deal-button-container" class="absolute -top-14 left-1/2 -translate-x-1/2 z-20">
-                    <button id="deal-btn" class="bg-yellow-500 hover:bg-yellow-400 text-black px-12 py-3 rounded-full font-black text-xl uppercase shadow-[0_0_30px_rgba(234,179,8,0.4)] transition-all active:scale-95 border-b-4 border-yellow-700 active:border-b-0 active:translate-y-1">
+                    <button id="deal-btn" class="bg-yellow-500 hover:bg-yellow-400 text-black px-12 py-3 md:px-16 md:py-4 rounded-xl font-black text-xl md:text-2xl uppercase shadow-[0_0_30px_rgba(234,179,8,0.4)] transition-all active:scale-95 border-b-4 border-yellow-700 active:border-b-0 active:translate-y-1">
                         Deal
                     </button>
                 </div>
@@ -213,12 +241,15 @@
                         </div>
                         <div class="flex flex-col items-end">
                             <span class="text-neutral-500 text-[10px] font-black uppercase tracking-widest">Bankroll</span>
-                            <span id="balance-display" class="text-xl md:text-3xl font-black text-yellow-400 leading-none">$10,000</span>
+                            <span id="balance-display" class="text-xl md:text-4xl font-black text-yellow-400 leading-none">$10,000</span>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
+        <footer class="mt-0.5 text-center text-neutral-600 text-[7px] uppercase font-bold tracking-[0.1em]">
+            Training Only • 8-Deck Shoe • Standard Rules
+        </footer>
     </div>
     <script type="module" src="./logic.js"></script>
     <script type="module" src="./main.js"></script>
