@@ -1,0 +1,5 @@
+{
+  "name": "a baccarat game",
+  "description": "A professional-grade Baccarat simulator with 8-deck shoe, burn-card initialization, and full roadmap visualization including Big Road, Big Eye Boy, Small Road, and Cockroach Pig.",
+  "requestFramePermissions": []
+}
