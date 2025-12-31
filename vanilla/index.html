@@ -17,6 +17,7 @@
             overflow: hidden;
             -webkit-user-select: none;
             user-select: none;
+            height: 100dvh; /* Dynamic viewport height */
         }
         .safe-area-inset {
             padding-bottom: env(safe-area-inset-bottom);
@@ -50,7 +51,7 @@
         }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden text-white safe-area-inset">
+<body class="flex flex-col overflow-hidden text-white safe-area-inset">
     <!-- Win Splash Layer -->
     <div id="win-splash-layer"></div>
 
@@ -87,79 +88,79 @@
     </div>
 
     <!-- Top Section: Table and Hands Display -->
-    <div class="relative h-[55vh] md:h-[50vh] bg-gradient-to-b from-[#1a2b33] to-[#0a1217] flex flex-col items-center justify-center p-3 border-b border-white/10 shadow-2xl z-10">
-        <div class="absolute top-4 left-6 flex items-center gap-4">
-            <button id="open-settings" class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-400/20 hover:bg-blue-500/30 transition-all">
-                <i class="fas fa-cog text-blue-400 text-lg"></i>
+    <div class="relative h-[40dvh] md:h-[45dvh] bg-gradient-to-b from-[#1a2b33] to-[#0a1217] flex flex-col items-center justify-center p-3 border-b border-white/10 shadow-2xl z-10">
+        <div class="absolute top-2 md:top-4 left-4 md:left-6 flex items-center gap-2 md:gap-4">
+            <button id="open-settings" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-400/20 hover:bg-blue-500/30 transition-all">
+                <i class="fas fa-cog text-blue-400 text-sm md:text-lg"></i>
             </button>
-            <div class="text-sm font-black tracking-[0.2em] text-neutral-500 uppercase">STAKE EXTREME</div>
+            <div class="text-[10px] md:text-sm font-black tracking-[0.1em] md:tracking-[0.2em] text-neutral-500 uppercase">STAKE EXTREME</div>
         </div>
 
-        <div id="auto-indicator" class="absolute top-4 right-6 hidden items-center gap-3">
-            <div class="text-xs font-black text-green-500 uppercase tracking-widest animate-pulse">Auto Dealing</div>
-            <div class="w-10 h-10 rounded-full border-2 border-green-500 flex items-center justify-center bg-black/60 shadow-lg shadow-green-500/20">
-                <span id="countdown-text" class="text-sm font-black text-green-500">5</span>
+        <div id="auto-indicator" class="absolute top-2 md:top-4 right-4 md:right-6 hidden items-center gap-2 md:gap-3">
+            <div class="text-[8px] md:text-xs font-black text-green-500 uppercase tracking-widest animate-pulse">Auto Dealing</div>
+            <div class="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-green-500 flex items-center justify-center bg-black/60 shadow-lg shadow-green-500/20">
+                <span id="countdown-text" class="text-xs md:text-sm font-black text-green-500">5</span>
             </div>
         </div>
 
         <!-- Burn status overlay -->
         <div id="initializing-label" class="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm hidden">
-            <div class="text-center animate-pulse">
-                <p id="init-message" class="text-yellow-400 text-2xl font-black uppercase tracking-widest">Initializing...</p>
+            <div class="text-center animate-pulse px-6">
+                <p id="init-message" class="text-yellow-400 text-lg md:text-2xl font-black uppercase tracking-widest">Initializing...</p>
             </div>
         </div>
 
         <!-- End of Shoe overlay -->
         <div id="shoe-end-overlay" class="absolute inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-md px-6 hidden">
-            <div class="bg-[#1a2b33] border border-white/10 p-8 rounded-3xl shadow-2xl text-center max-w-sm">
-                <div class="w-20 h-20 bg-yellow-500/10 border border-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <i class="fas fa-redo text-yellow-500 text-3xl"></i>
+            <div class="bg-[#1a2b33] border border-white/10 p-6 md:p-8 rounded-3xl shadow-2xl text-center max-w-sm">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-yellow-500/10 border border-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+                    <i class="fas fa-redo text-yellow-500 text-2xl md:text-3xl"></i>
                 </div>
-                <h2 class="text-2xl font-black uppercase tracking-widest text-white mb-2">End of Shoe</h2>
-                <p class="text-neutral-400 text-sm mb-8 leading-relaxed">The current shoe has finished. Start a fresh 8-deck shoe to continue training.</p>
-                <button id="new-shoe-confirm-btn" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black py-4 rounded-xl uppercase tracking-widest transition-all active:scale-95 shadow-xl shadow-yellow-500/20">
+                <h2 class="text-xl md:text-2xl font-black uppercase tracking-widest text-white mb-2">End of Shoe</h2>
+                <p class="text-neutral-400 text-xs md:text-sm mb-6 md:mb-8 leading-relaxed">The current shoe has finished. Start a fresh 8-deck shoe to continue training.</p>
+                <button id="new-shoe-confirm-btn" class="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-black py-3 md:py-4 rounded-xl uppercase tracking-widest transition-all active:scale-95 shadow-xl shadow-yellow-500/20">
                     New Shoe
                 </button>
             </div>
         </div>
 
-        <div class="flex gap-6 md:gap-36 w-full max-w-6xl items-center justify-center mt-4">
+        <div class="flex gap-4 md:gap-36 w-full max-w-6xl items-center justify-center mt-2 md:mt-4 overflow-hidden">
             <!-- Player Hand -->
-            <div id="player-hand" class="flex flex-col items-center gap-2 md:gap-4 transition-all hand-container">
-                <div id="player-cards-grid" class="flex flex-col items-center gap-1.5 md:gap-3">
+            <div id="player-hand" class="flex flex-col items-center gap-1 md:gap-4 transition-all hand-container">
+                <div id="player-cards-grid" class="flex flex-col items-center gap-1 md:gap-3">
                     <!-- Cards injected here -->
                 </div>
-                <div class="relative group">
-                    <span id="player-label" class="text-xl md:text-2xl font-black bg-[#1565c0] px-8 md:px-10 py-2 rounded-full shadow-2xl border border-white/30 block transform transition-transform">闲 0</span>
+                <div class="relative">
+                    <span id="player-label" class="text-sm md:text-2xl font-black bg-[#1565c0] px-4 md:px-10 py-1 md:py-2 rounded-full shadow-2xl border border-white/30 block">闲 0</span>
                 </div>
             </div>
 
             <!-- Banker Hand -->
-            <div id="banker-hand" class="flex flex-col items-center gap-2 md:gap-4 transition-all hand-container">
-                <div id="banker-cards-grid" class="flex flex-col items-center gap-1.5 md:gap-3">
+            <div id="banker-hand" class="flex flex-col items-center gap-1 md:gap-4 transition-all hand-container">
+                <div id="banker-cards-grid" class="flex flex-col items-center gap-1 md:gap-3">
                     <!-- Cards injected here -->
                 </div>
-                <div class="relative group">
-                    <span id="banker-label" class="text-xl md:text-2xl font-black bg-[#c62828] px-8 md:px-10 py-2 rounded-full shadow-2xl border border-white/30 block transform transition-transform">庄 0</span>
+                <div class="relative">
+                    <span id="banker-label" class="text-sm md:text-2xl font-black bg-[#c62828] px-4 md:px-10 py-1 md:py-2 rounded-full shadow-2xl border border-white/30 block">庄 0</span>
                 </div>
             </div>
         </div>
 
         <!-- Action Button -->
-        <div class="absolute bottom-4 md:bottom-8 w-full flex flex-col items-center justify-center">
-            <button id="deal-button" class="bg-yellow-500 hover:bg-yellow-400 text-black px-16 py-4 rounded-2xl font-black text-2xl uppercase tracking-[0.1em] transition-all active:scale-95 shadow-2xl shadow-yellow-500/20">
+        <div class="absolute bottom-2 md:bottom-8 w-full flex flex-col items-center justify-center">
+            <button id="deal-button" class="bg-yellow-500 hover:bg-yellow-400 text-black px-10 md:px-16 py-2 md:py-4 rounded-xl md:rounded-2xl font-black text-lg md:text-2xl uppercase tracking-[0.1em] transition-all active:scale-95 shadow-2xl shadow-yellow-500/20">
                 Deal
             </button>
         </div>
     </div>
 
     <!-- Middle: Roadmap Area -->
-    <div class="flex-grow min-h-0 relative" id="roadmap-container">
+    <div class="flex-grow min-h-0 relative bg-[#050a0e] overflow-hidden" id="roadmap-container">
         <!-- Roadmap injected by main.js -->
     </div>
 
     <!-- Bottom: Betting Table -->
-    <div id="betting-table-container" class="flex-shrink-0 z-20">
+    <div id="betting-table-container" class="flex-shrink-0 z-20 pb-safe">
         <!-- Betting table injected by main.js -->
     </div>
 

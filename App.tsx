@@ -117,7 +117,8 @@ const SettingsModal: React.FC<{
 const App: React.FC = () => {
   const [shoe, setShoe] = useState<Card[]>([]);
   const [history, setHistory] = useState<RoundResult[]>([]);
-  const [balance, setBalance] = useState(1000);
+  // Added explicit type to balance and currentBets to avoid 'unknown' operator issues
+  const [balance, setBalance] = useState<number>(1000);
   const [currentBets, setCurrentBets] = useState<Map<BetTarget, number>>(new Map());
   const [gameState, setGameState] = useState<'betting' | 'dealing' | 'result' | 'initializing' | 'shoeEnd'>('initializing');
   const [lastRound, setLastRound] = useState<RoundResult | null>(null);
@@ -177,7 +178,8 @@ const App: React.FC = () => {
   const clearSpecificBet = (target: BetTarget) => {
     if (gameState !== 'betting') return;
     const amount = currentBets.get(target) || 0;
-    setBalance(prev => prev + amount);
+    // Added explicit type to avoid unknown + number error on line 172
+    setBalance((prev: number) => prev + amount);
     setCurrentBets(prev => {
       const next = new Map(prev);
       next.delete(target);
@@ -188,8 +190,9 @@ const App: React.FC = () => {
   const clearAllBets = () => {
     if (gameState !== 'betting') return;
     let total = 0;
-    currentBets.forEach(amt => total += amt);
-    setBalance(prev => prev + total);
+    // Added explicit type to forEach callback
+    currentBets.forEach((amt: number) => total += amt);
+    setBalance((prev: number) => prev + total);
     setCurrentBets(new Map());
   };
 
@@ -205,7 +208,8 @@ const App: React.FC = () => {
       setShoe(nextShoe);
       
       let payout = 0;
-      currentBets.forEach((amt, target) => {
+      // Added explicit types to avoid unknown operator issues
+      currentBets.forEach((amt: number, target: BetTarget) => {
         if (target === BetTarget.Player && result.winner === Winner.Player) payout += amt * 2;
         if (target === BetTarget.Banker && result.winner === Winner.Banker) payout += amt * 2;
         if (result.winner === Winner.Tie) payout += amt;

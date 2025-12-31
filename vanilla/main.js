@@ -212,8 +212,8 @@ function showWinSplash(amount) {
   splash.className = "fixed inset-0 pointer-events-none z-[100] flex items-center justify-center overflow-hidden";
   splash.innerHTML = `
     <div class="animate-win-burst flex flex-col items-center">
-      <div class="text-6xl md:text-8xl font-black uppercase tracking-tighter italic win-splash-text drop-shadow-[0_0_30px_rgba(250,204,21,0.6)]">Winner!</div>
-      <div class="text-3xl md:text-5xl font-black text-white mt-2 drop-shadow-lg">+$${amount.toLocaleString()}</div>
+      <div class="text-4xl md:text-8xl font-black uppercase tracking-tighter italic win-splash-text drop-shadow-[0_0_30px_rgba(250,204,21,0.6)]">Winner!</div>
+      <div class="text-2xl md:text-5xl font-black text-white mt-1 md:mt-2 drop-shadow-lg">+$${amount.toLocaleString()}</div>
     </div>
   `;
   el.winSplashLayer.appendChild(splash);
@@ -223,12 +223,12 @@ function showWinSplash(amount) {
 function createCardHTML(card) {
   const isRed = card.suit === Suit.Hearts || card.suit === Suit.Diamonds;
   return `
-    <div class="w-12 h-auto aspect-[2.5/3.5] md:w-32 bg-white rounded-lg shadow-2xl flex flex-col p-1.5 md:p-2 transition-all border border-neutral-300">
-      <div class="text-sm md:text-3xl font-bold leading-none text-black/90">
+    <div class="w-10 h-14 md:w-32 md:h-44 bg-white rounded-md md:rounded-lg shadow-xl flex flex-col p-1 md:p-2 transition-all border border-neutral-300">
+      <div class="text-[10px] md:text-3xl font-bold leading-none text-black/90">
         <span class="${isRed ? 'text-red-600' : 'text-black'}">${card.rank}</span>
       </div>
-      <div class="flex-grow flex items-center justify-center text-2xl md:text-7xl ${isRed ? 'text-red-600' : 'text-black'}">${card.suit}</div>
-      <div class="text-sm md:text-3xl font-bold leading-none self-end rotate-180 text-black/90">
+      <div class="flex-grow flex items-center justify-center text-lg md:text-7xl ${isRed ? 'text-red-600' : 'text-black'}">${card.suit}</div>
+      <div class="text-[10px] md:text-3xl font-bold leading-none self-end rotate-180 text-black/90">
         <span class="${isRed ? 'text-red-600' : 'text-black'}">${card.rank}</span>
       </div>
     </div>
@@ -238,25 +238,25 @@ function createCardHTML(card) {
 function renderHand(container, cards) {
   if (!cards) {
     container.innerHTML = `
-      <div class="flex gap-2">
-        <div class="w-12 md:w-32 aspect-[2.5/3.5] bg-white/5 border border-white/10 rounded-lg shadow-inner"></div>
-        <div class="w-12 md:w-32 aspect-[2.5/3.5] bg-white/5 border border-white/10 rounded-lg shadow-inner"></div>
+      <div class="flex gap-1 md:gap-2">
+        <div class="w-10 h-14 md:w-32 md:h-44 bg-white/5 border border-white/10 rounded-md md:rounded-lg shadow-inner"></div>
+        <div class="w-10 h-14 md:w-32 md:h-44 bg-white/5 border border-white/10 rounded-md md:rounded-lg shadow-inner"></div>
       </div>
-      <div class="flex items-center justify-center h-20 md:h-46">
-        <div class="w-12 md:w-32 aspect-[2.5/3.5] bg-transparent"></div>
+      <div class="flex items-center justify-center h-14 md:h-46">
+        <div class="w-10 h-14 md:w-32 md:h-44 bg-transparent"></div>
       </div>
     `;
     return;
   }
   
-  const row1 = `<div class="flex gap-2">${cards.slice(0, 2).map(createCardHTML).join('')}</div>`;
+  const row1 = `<div class="flex gap-1 md:gap-2">${cards.slice(0, 2).map(createCardHTML).join('')}</div>`;
   const row2 = cards[2] 
-    ? `<div class="w-12 md:w-32 aspect-[2.5/3.5] flex items-center justify-center">${createCardHTML(cards[2])}</div>`
-    : `<div class="w-12 md:w-32 aspect-[2.5/3.5] bg-transparent"></div>`;
+    ? `<div class="w-10 h-14 md:w-32 md:h-44 flex items-center justify-center">${createCardHTML(cards[2])}</div>`
+    : `<div class="w-10 h-14 md:w-32 md:h-44 bg-transparent"></div>`;
     
   container.innerHTML = `
     ${row1}
-    <div class="flex items-center justify-center h-20 md:h-46">
+    <div class="flex items-center justify-center h-14 md:h-46">
       ${row2}
     </div>
   `;
@@ -298,7 +298,7 @@ function renderRoadmap() {
 
   let roadmapHTML = `
     <div class="flex flex-col w-full bg-[#050a0e] p-0 gap-0 h-full min-h-0 overflow-hidden">
-      <div class="flex items-center gap-3 px-2 py-0.5 bg-black/80 text-[8px] font-black text-neutral-500 border-b border-white/5">
+      <div class="flex items-center gap-3 px-2 py-0.5 bg-black/80 text-[8px] md:text-[10px] font-black text-neutral-500 border-b border-white/5 flex-shrink-0">
         <span class="text-yellow-400">#${stats.total} HANDS</span>
         <div class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#1565c0]"></span> ${stats.p}</div>
         <div class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#c62828]"></span> ${stats.b}</div>
@@ -306,8 +306,8 @@ function renderRoadmap() {
       </div>
       <div class="flex flex-col flex-grow min-h-0 overflow-y-auto scrollbar-hide bg-[#0d161d]">
         <div class="border-b border-white/5">
-          ${renderGrid(bigRoadMatrix, 100, 'w-2.5 h-2.5 md:w-4 md:h-4', 'bg-black/20', (cell) => cell && `
-            <div class="w-[95%] h-[95%] rounded-full border-[1.2px] md:border-[1.8px] relative
+          ${renderGrid(bigRoadMatrix, 100, 'w-2 h-2 md:w-4 md:h-4', 'bg-black/20', (cell) => cell && `
+            <div class="w-[95%] h-[95%] rounded-full border-[1px] md:border-[1.8px] relative
               ${cell.winner === Winner.Banker ? 'border-[#ff4d4d]' : cell.winner === Winner.Player ? 'border-[#4d94ff]' : 'border-[#4ade80]'}">
               ${cell.ties > 0 ? '<div class="absolute w-full h-[0.5px] bg-[#4ade80] rotate-45"></div>' : ''}
               ${cell.ties > 1 ? `<span class="absolute inset-0 flex items-center justify-center text-[5px] md:text-[7px] font-black text-green-300">${cell.ties}</span>` : ''}
@@ -317,7 +317,7 @@ function renderRoadmap() {
         <div class="flex flex-col min-h-0">
           <div class="border-b border-white/5">
             ${renderGrid(bigEyeMatrix, 200, 'w-1.5 h-1.5 md:w-2 md:h-2', 'bg-black/10', (color) => color && `
-              <div class="w-[95%] h-[95%] rounded-full border-[0.8px] ${color === 'red' ? 'border-red-500' : 'border-blue-500'}"></div>
+              <div class="w-[95%] h-[95%] rounded-full border-[0.6px] md:border-[0.8px] ${color === 'red' ? 'border-red-500' : 'border-blue-500'}"></div>
             `)}
           </div>
           <div class="border-b border-white/5">
@@ -351,27 +351,27 @@ function renderBettingTable() {
   const totalBet = Array.from(currentBets.values()).reduce((a, b) => a + b, 0);
   
   let html = `
-    <div class="w-full bg-[#0f212e] p-2 md:p-3 flex flex-col gap-2 md:gap-4 rounded-t-3xl shadow-inner border-t border-white/5">
-      <div class="flex gap-2 h-24 md:h-32">
+    <div class="w-full bg-[#0f212e] p-2 md:p-3 flex flex-col gap-1 md:gap-4 rounded-t-2xl md:rounded-t-3xl shadow-inner border-t border-white/5">
+      <div class="flex gap-2 h-16 md:h-32">
         ${renderBetArea(BetTarget.Player, '闲家', 'bg-[#1565c0] text-white')}
         ${renderBetArea(BetTarget.Banker, '庄家', 'bg-[#c62828] text-white')}
       </div>
 
-      <div class="flex items-center justify-between px-1 md:px-2 pb-2 md:pb-4">
+      <div class="flex items-center justify-between px-1 md:px-2 pb-1 md:pb-4">
         <div class="flex flex-col items-start min-w-[50px]">
-          <span class="text-[8px] text-neutral-500 uppercase font-bold tracking-widest">余额</span>
-          <span class="text-sm md:text-lg font-black text-white">$${balance.toLocaleString()}</span>
+          <span class="text-[7px] md:text-[8px] text-neutral-500 uppercase font-bold tracking-widest">余额</span>
+          <span class="text-xs md:text-lg font-black text-white">$${balance.toLocaleString()}</span>
         </div>
 
         <div class="flex gap-2 items-center">
-           <button id="clear-all-bets" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-neutral-400 hover:text-white transition-colors">
-              <i class="fas fa-undo text-xs"></i>
+           <button id="clear-all-bets" class="w-7 h-7 md:w-10 md:h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 text-neutral-400 hover:text-white transition-colors">
+              <i class="fas fa-undo text-[10px] md:text-xs"></i>
            </button>
-          <div class="flex gap-1.5 md:gap-2 bg-black/20 p-1 rounded-full border border-white/5">
+          <div class="flex gap-1 md:gap-2 bg-black/20 p-1 rounded-full border border-white/5">
             ${[5, 10, 20, 50].map(val => `
               <button
                 data-chip="${val}"
-                class="chip-btn w-8 h-8 md:w-12 md:h-12 rounded-full border flex items-center justify-center font-black text-[10px] md:text-sm transition-all shadow-md
+                class="chip-btn w-7 h-7 md:w-12 md:h-12 rounded-full border flex items-center justify-center font-black text-[9px] md:text-sm transition-all shadow-md
                   ${selectedChip === val ? 'scale-110 border-yellow-400 bg-white text-black z-10' : 'border-white/10 bg-black/40 text-neutral-400 opacity-60'}
                 "
               >
@@ -382,8 +382,8 @@ function renderBettingTable() {
         </div>
 
         <div class="flex flex-col items-end min-w-[50px]">
-          <span class="text-[8px] text-neutral-500 uppercase font-bold tracking-widest">总下注</span>
-          <span class="text-sm md:text-lg font-black text-yellow-500">$${totalBet.toLocaleString()}</span>
+          <span class="text-[7px] md:text-[8px] text-neutral-500 uppercase font-bold tracking-widest">总下注</span>
+          <span class="text-xs md:text-lg font-black text-yellow-500">$${totalBet.toLocaleString()}</span>
         </div>
       </div>
     </div>
@@ -432,14 +432,14 @@ function renderBetArea(target, label, colorClass) {
   return `
     <button
       data-target="${target}"
-      class="bet-area-btn relative flex-1 flex flex-col items-center justify-center p-2 md:p-4 rounded-xl border border-white/10 transition-all active:scale-95 shadow-lg ${colorClass}"
+      class="bet-area-btn relative flex-1 flex flex-col items-center justify-center p-1 md:p-4 rounded-xl border border-white/10 transition-all active:scale-95 shadow-lg ${colorClass}"
     >
-      <span class="text-lg md:text-2xl font-black uppercase tracking-tighter">${label}</span>
-      <span class="text-[10px] font-bold opacity-60">1:1</span>
+      <span class="text-xs md:text-2xl font-black uppercase tracking-tighter">${label}</span>
+      <span class="text-[8px] md:text-[10px] font-bold opacity-60">1:1</span>
       
       ${amount > 0 ? `
         <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div class="bg-white text-black font-black text-[10px] w-8 h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center border-2 md:border-4 border-yellow-500 shadow-2xl scale-125 z-10">
+          <div class="bg-white text-black font-black text-[9px] md:text-[10px] w-6 h-6 md:w-12 md:h-12 rounded-full flex items-center justify-center border-2 md:border-4 border-yellow-500 shadow-2xl scale-125 z-10">
             $${amount}
           </div>
         </div>

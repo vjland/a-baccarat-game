@@ -74,7 +74,8 @@ export const BettingTable: React.FC<BettingTableProps> = ({ onBet, onClearBet, o
         <div className="flex flex-col items-end min-w-[50px]">
           <span className="text-[8px] text-neutral-500 uppercase font-bold tracking-widest">总下注</span>
           <span className="text-sm md:text-lg font-black text-yellow-500">
-            ${Array.from(currentBets.values()).reduce((a, b) => a + b, 0).toLocaleString()}
+            {/* Added explicit types to reduce callback to fix 'unknown' operator error */}
+            ${Array.from(currentBets.values()).reduce((a: number, b: number) => a + b, 0).toLocaleString()}
           </span>
         </div>
       </div>
