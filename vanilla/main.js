@@ -210,7 +210,7 @@ function setupBettingAreas() {
     el.bettingAreas.innerHTML = areas.map(a => `
         <button id="area-${a.id.replace(/\s+/g,'')}" class="${a.c} rounded-lg flex flex-col items-center justify-center relative h-full border border-white/5 transition-transform active:scale-95">
             <span class="text-[6px] md:text-xs">${a.l}</span>
-            <span class="text-[10px] md:text-2xl">${a.odds}</span>
+            <span class="text-[10px] md:text-xl">${a.odds}</span>
             <div class="chip hidden absolute -top-1 left-1/2 -translate-x-1/2 bg-yellow-400 text-black px-1 rounded-full text-[6px] md:text-[10px] font-bold border border-white shadow-sm"></div>
         </button>`).join('');
     
@@ -239,7 +239,7 @@ function setupChips() {
     [100, 200, 500].forEach(v => {
         const b = document.createElement('button'); 
         b.textContent = v;
-        b.className = `w-7 h-7 md:w-12 md:h-12 rounded-full border-2 border-white/20 text-[8px] md:text-xs font-black transition-transform ${v===100?'bg-black':v===200?'bg-blue-600':'bg-purple-600'}`;
+        b.className = `w-6 h-6 md:w-10 md:h-10 rounded-full border-2 border-white/20 text-[7px] md:text-[10px] font-black transition-transform ${v===100?'bg-black':v===200?'bg-blue-600':'bg-purple-600'}`;
         b.onclick = () => { selectedChip = v; render(); };
         b.id = `chip-${v}`; 
         el.chipSelection.appendChild(b);

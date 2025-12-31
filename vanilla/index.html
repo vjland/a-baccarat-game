@@ -113,15 +113,16 @@
                 <div id="deal-button-container" class="absolute -top-10 left-1/2 -translate-x-1/2 z-20 hidden">
                     <button id="deal-btn" class="bg-yellow-500 hover:bg-yellow-400 text-black px-8 py-2 md:px-16 md:py-4 rounded-lg md:rounded-xl font-black text-xs md:text-2xl uppercase shadow-xl border-b-2 md:border-b-4 border-yellow-700 active:translate-y-1">Deal</button>
                 </div>
-                <div class="grid grid-cols-5 gap-1 h-14 md:h-36" id="betting-areas"></div>
-                <div class="bg-black/50 p-1 md:p-4 rounded-xl border border-white/10 flex items-center justify-between gap-2 shadow-2xl backdrop-blur-md">
+                <!-- Betting Areas - Shorter by ~30% -->
+                <div class="grid grid-cols-5 gap-1 h-10 md:h-24" id="betting-areas"></div>
+                <div class="bg-black/50 p-1 md:p-3 rounded-xl border border-white/10 flex items-center justify-between gap-2 shadow-2xl backdrop-blur-md">
                     <div class="flex items-center gap-2">
                         <button id="clear-btn" class="px-1.5 py-1 bg-neutral-800 border border-white/10 text-neutral-400 text-[8px] md:text-[10px] font-black uppercase rounded hover:bg-neutral-700 transition-colors">Recall</button>
-                        <div id="chip-selection" class="flex gap-1 md:gap-4"></div>
+                        <div id="chip-selection" class="flex gap-1 md:gap-3"></div>
                     </div>
                     <div class="flex flex-col items-end">
                         <span class="text-neutral-500 text-[6px] md:text-[10px] uppercase font-bold">Bankroll</span>
-                        <span id="balance-display" class="text-sm md:text-4xl font-black text-yellow-400">$10,000</span>
+                        <span id="balance-display" class="text-sm md:text-4xl font-black text-yellow-400 leading-none">$10,000</span>
                     </div>
                 </div>
             </div>
