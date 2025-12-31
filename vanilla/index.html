@@ -1,28 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Baccarat Pro Trainer - Vanilla</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+  <path d='M50 0 A50 50 0 0 0 50 100 Z' fill='%23d32f2f'/>
+  <path d='M50 0 A50 50 0 0 1 50 100 Z' fill='%231976d2'/>
+  
+  <text x='23' y='65' fill='white' font-family='sans-serif' font-weight='bold' font-size='40'>庄</text>
+  <text x='53' y='65' fill='white' font-family='sans-serif' font-weight='bold' font-size='40'>闲</text>
+</svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0a0a0a;
             color: #e5e5e5;
         }
+
         .casino-gradient {
             background: radial-gradient(circle at center, #1a4731 0%, #0a1f14 100%);
         }
+
         .scrollbar-hide::-webkit-scrollbar {
             display: none;
         }
+
         .scrollbar-hide {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
         .roadmap-cell {
             background-color: #171717;
             display: flex;
@@ -30,21 +44,33 @@
             justify-content: center;
             position: relative;
         }
+
         @keyframes pulse-slow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
+
         .animate-pulse-slow {
             animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
+
         .interval-btn.active {
             background-color: rgba(234, 179, 8, 0.2);
             color: #eab308;
             border-color: rgba(234, 179, 8, 0.5);
         }
+
         #settings-panel.open {
             transform: translateX(0);
         }
+
         .win-splash-text {
             background: linear-gradient(90deg, #facc15, #fef08a, #facc15);
             background-size: 200% auto;
@@ -52,39 +78,78 @@
             -webkit-text-fill-color: transparent;
             animation: shine 3s linear infinite;
         }
+
         @keyframes shine {
-            0% { background-position: -200% center; }
-            100% { background-position: center; }
+            0% {
+                background-position: -200% center;
+            }
+
+            100% {
+                background-position: center;
+            }
         }
+
         @keyframes win-burst {
-            0% { transform: scale(0.5); opacity: 0; filter: blur(10px); }
-            20% { transform: scale(1.1); opacity: 1; filter: blur(0); }
-            80% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(1.2); opacity: 0; }
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+                filter: blur(10px);
+            }
+
+            20% {
+                transform: scale(1.1);
+                opacity: 1;
+                filter: blur(0);
+            }
+
+            80% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
         }
+
         .animate-win-burst {
             animation: win-burst 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
+
         @keyframes winner-flash {
-            0%, 100% { transform: scale(1); filter: brightness(1); }
-            50% { transform: scale(1.05); filter: brightness(1.4); }
+
+            0%,
+            100% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+                filter: brightness(1.4);
+            }
         }
+
         .animate-winner-flash {
             animation: winner-flash 0.6s ease-in-out infinite;
         }
     </style>
 </head>
+
 <body class="min-h-screen casino-gradient overflow-x-hidden">
     <div id="app" class="min-h-screen flex flex-col p-2 md:p-4 relative max-w-[1600px] mx-auto w-full">
         <!-- New Shoe Confirmation Modal -->
-        <div id="modal-container" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+        <div id="modal-container"
+            class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
             <div class="bg-neutral-900 border border-white/10 p-6 rounded-2xl max-w-sm w-full shadow-2xl">
                 <div class="flex items-center gap-3 mb-4 text-red-500">
                     <i class="fas fa-exclamation-triangle text-2xl"></i>
                     <h2 class="text-xl font-black uppercase tracking-tight text-white">New Shoe?</h2>
                 </div>
                 <p id="modal-message" class="text-neutral-400 text-sm leading-relaxed mb-6">
-                    Are you sure you want to start a new shoe? All current history and roadmaps will be permanently cleared.
+                    Are you sure you want to start a new shoe? All current history and roadmaps will be permanently
+                    cleared.
                 </p>
                 <div class="flex gap-3">
                     <button id="modal-cancel" class="flex-1 px-4 py-2 rounded-lg font-bold text-sm bg-white/5 hover:bg-white/10 text-neutral-300 transition-colors">Cancel</button>
@@ -94,7 +159,8 @@
         </div>
 
         <!-- Settings Sidebar -->
-        <div id="settings-panel" class="fixed top-0 right-0 h-full w-[280px] bg-neutral-900/95 border-l border-white/10 z-[110] transform translate-x-full transition-transform duration-300 p-6 backdrop-blur-xl">
+        <div id="settings-panel"
+            class="fixed top-0 right-0 h-full w-[280px] bg-neutral-900/95 border-l border-white/10 z-[110] transform translate-x-full transition-transform duration-300 p-6 backdrop-blur-xl">
             <div class="flex items-center justify-between mb-8">
                 <h3 class="text-sm font-black uppercase tracking-widest text-neutral-400">Settings</h3>
                 <button id="settings-close" class="text-neutral-500 hover:text-white"><i class="fas fa-times"></i></button>
@@ -119,7 +185,8 @@
         </div>
 
         <!-- Header -->
-        <header class="flex-shrink-0 flex items-center justify-between gap-2 px-2 py-1 mb-2 bg-black/30 rounded-lg border border-white/5 backdrop-blur-sm relative z-10">
+        <header
+            class="flex-shrink-0 flex items-center justify-between gap-2 px-2 py-1 mb-2 bg-black/30 rounded-lg border border-white/5 backdrop-blur-sm relative z-10">
             <div class="flex items-center gap-3">
                 <h1 class="text-xl md:text-2xl font-black italic tracking-tighter uppercase">
                     Baccarat<span class="text-yellow-400">Pro</span>
@@ -134,7 +201,8 @@
                 <div class="flex flex-col items-end">
                     <div class="flex items-center gap-1.5">
                         <div class="w-16 md:w-24 h-1.5 bg-neutral-800 rounded-full overflow-hidden">
-                            <div id="shoe-progress" class="h-full bg-emerald-500 transition-all" style="width: 0%"></div>
+                            <div id="shoe-progress" class="h-full bg-emerald-500 transition-all" style="width: 0%">
+                            </div>
                         </div>
                         <span id="shoe-count" class="text-[10px] font-mono text-neutral-500">0/416</span>
                     </div>
@@ -146,11 +214,14 @@
 
         <!-- Main Gameplay - Doubled Section -->
         <main class="flex-grow flex flex-col gap-4 w-full mb-4 overflow-hidden">
-            <div class="flex-shrink-0 flex flex-row items-stretch justify-center gap-2 md:gap-12 px-2 py-6 bg-black/10 rounded-2xl border border-white/5 shadow-2xl">
+            <div
+                class="flex-shrink-0 flex flex-row items-stretch justify-center gap-2 md:gap-12 px-2 py-6 bg-black/10 rounded-2xl border border-white/5 shadow-2xl">
                 <!-- Player Hand -->
                 <div class="flex flex-col items-center gap-1 flex-1">
                     <h2 class="text-blue-400 font-black tracking-widest uppercase text-xs md:text-3xl">Player</h2>
-                    <div id="player-cards" class="flex flex-wrap gap-1 p-2 md:p-6 bg-black/40 rounded-2xl border border-white/10 w-full justify-center transition-all min-h-[140px] md:min-h-[320px] items-center shadow-inner relative"></div>
+                    <div id="player-cards"
+                        class="flex flex-wrap gap-1 p-2 md:p-6 bg-black/40 rounded-2xl border border-white/10 w-full justify-center transition-all min-h-[140px] md:min-h-[320px] items-center shadow-inner relative">
+                    </div>
                     <div class="mt-2 bg-black/80 px-4 py-1 md:px-8 md:py-2 rounded-full border border-white/20">
                         <span id="player-score" class="text-xl md:text-5xl font-black text-white">0</span>
                     </div>
@@ -159,25 +230,35 @@
                 <!-- Central Control (Timer & Result) -->
                 <div class="flex flex-col items-center justify-center min-w-[100px] md:min-w-[300px] h-full gap-6">
                     <div id="initializing-label" class="hidden text-center animate-pulse">
-                        <p class="text-yellow-400 text-sm md:text-xl font-bold uppercase tracking-tighter">Burning <span id="burn-value">0</span></p>
+                        <p class="text-yellow-400 text-sm md:text-xl font-bold uppercase tracking-tighter">Burning
+                            <span id="burn-value">0</span>
+                        </p>
                     </div>
 
-                    <div id="auto-status" class="hidden flex flex-col items-center gap-2 animate-in fade-in zoom-in duration-300">
-                        <div id="timer-display" class="w-16 h-16 md:w-24 md:h-24 rounded-full border-4 border-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.4)] flex items-center justify-center text-xl md:text-4xl font-black text-yellow-400 bg-black/60">10</div>
+                    <div id="auto-status"
+                        class="hidden flex flex-col items-center gap-2 animate-in fade-in zoom-in duration-300">
+                        <div id="timer-display"
+                            class="w-16 h-16 md:w-24 md:h-24 rounded-full border-4 border-yellow-400 shadow-[0_0_20px_rgba(234,179,8,0.4)] flex items-center justify-center text-xl md:text-4xl font-black text-yellow-400 bg-black/60">
+                            10</div>
                         <span class="text-[10px] md:text-sm font-black uppercase tracking-widest text-yellow-500/80">Auto Dealing</span>
                     </div>
 
-                    <div id="result-label" class="hidden text-center px-4 py-2 md:px-10 md:py-5 rounded-xl font-black text-sm md:text-3xl transition-all shadow-2xl ring-2 ring-white/20 bg-white/5 text-white/20">
+                    <div id="result-label"
+                        class="hidden text-center px-4 py-2 md:px-10 md:py-5 rounded-xl font-black text-sm md:text-3xl transition-all shadow-2xl ring-2 ring-white/20 bg-white/5 text-white/20">
                         ...
                     </div>
-                    
-                    <div id="manual-label" class="text-neutral-500 text-xs md:text-lg font-black uppercase tracking-widest bg-white/5 px-6 py-2 rounded-full border border-white/5">Place Bets</div>
+
+                    <div id="manual-label"
+                        class="text-neutral-500 text-xs md:text-lg font-black uppercase tracking-widest bg-white/5 px-6 py-2 rounded-full border border-white/5">
+                        Place Bets</div>
                 </div>
 
                 <!-- Banker Hand -->
                 <div class="flex flex-col items-center gap-1 flex-1">
                     <h2 class="text-red-400 font-black tracking-widest uppercase text-xs md:text-3xl">Banker</h2>
-                    <div id="banker-cards" class="flex flex-wrap gap-1 p-2 md:p-6 bg-black/40 rounded-2xl border border-white/10 w-full justify-center transition-all min-h-[140px] md:min-h-[320px] items-center shadow-inner relative"></div>
+                    <div id="banker-cards"
+                        class="flex flex-wrap gap-1 p-2 md:p-6 bg-black/40 rounded-2xl border border-white/10 w-full justify-center transition-all min-h-[140px] md:min-h-[320px] items-center shadow-inner relative">
+                    </div>
                     <div class="mt-2 bg-black/80 px-4 py-1 md:px-8 md:py-2 rounded-full border border-white/20">
                         <span id="banker-score" class="text-xl md:text-5xl font-black text-white">0</span>
                     </div>
@@ -185,39 +266,55 @@
             </div>
 
             <!-- Roadmaps -->
-            <div id="roadmap-container" class="flex flex-col gap-2 w-full bg-black/60 p-3 rounded-lg border border-white/5 backdrop-blur-md overflow-hidden flex-shrink-0 shadow-2xl">
+            <div id="roadmap-container"
+                class="flex flex-col gap-2 w-full bg-black/60 p-3 rounded-lg border border-white/5 backdrop-blur-md overflow-hidden flex-shrink-0 shadow-2xl">
                 <div class="flex gap-2 h-36 md:h-40">
                     <div class="flex flex-col flex-grow min-w-0">
-                        <h3 class="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-widest flex items-center gap-2">
+                        <h3
+                            class="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-widest flex items-center gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-yellow-500/50"></span> Big Road
                         </h3>
-                        <div id="big-road" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-800 p-px rounded border border-neutral-700 overflow-x-auto h-full scrollbar-hide"></div>
+                        <div id="big-road"
+                            class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-800 p-px rounded border border-neutral-700 overflow-x-auto h-full scrollbar-hide">
+                        </div>
                     </div>
                     <div class="hidden lg:flex flex-col w-72">
-                        <h3 class="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-widest flex items-center gap-2">
+                        <h3
+                            class="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-widest flex items-center gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-yellow-500/50"></span> Bead Plate
                         </h3>
-                        <div id="bead-plate" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-800 p-px rounded border border-neutral-700 overflow-x-auto h-full scrollbar-hide"></div>
+                        <div id="bead-plate"
+                            class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-800 p-px rounded border border-neutral-700 overflow-x-auto h-full scrollbar-hide">
+                        </div>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <div>
-                        <h3 class="text-[9px] font-bold text-neutral-500 mb-1 uppercase tracking-widest flex items-center gap-2">
+                        <h3
+                            class="text-[9px] font-bold text-neutral-500 mb-1 uppercase tracking-widest flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full border-[1.5px] border-red-500/50"></span> Big Eye Boy
                         </h3>
-                        <div id="big-eye-boy" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-800 p-px rounded border border-neutral-700 h-20 md:h-24 overflow-x-auto scrollbar-hide"></div>
+                        <div id="big-eye-boy"
+                            class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-800 p-px rounded border border-neutral-700 h-20 md:h-24 overflow-x-auto scrollbar-hide">
+                        </div>
                     </div>
                     <div>
-                        <h3 class="text-[9px] font-bold text-neutral-500 mb-1 uppercase tracking-widest flex items-center gap-2">
+                        <h3
+                            class="text-[9px] font-bold text-neutral-500 mb-1 uppercase tracking-widest flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-red-500/50"></span> Small Road
                         </h3>
-                        <div id="small-road" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-800 p-px rounded border border-neutral-700 h-20 md:h-24 overflow-x-auto scrollbar-hide"></div>
+                        <div id="small-road"
+                            class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-800 p-px rounded border border-neutral-700 h-20 md:h-24 overflow-x-auto scrollbar-hide">
+                        </div>
                     </div>
                     <div>
-                        <h3 class="text-[9px] font-bold text-neutral-500 mb-1 uppercase tracking-widest flex items-center gap-2">
+                        <h3
+                            class="text-[9px] font-bold text-neutral-500 mb-1 uppercase tracking-widest flex items-center gap-2">
                             <span class="w-2.5 h-[1.5px] bg-red-500/50 rotate-45"></span> Cockroach Road
                         </h3>
-                        <div id="cockroach-road" class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-800 p-px rounded border border-neutral-700 h-20 md:h-24 overflow-x-auto scrollbar-hide"></div>
+                        <div id="cockroach-road"
+                            class="grid grid-rows-6 grid-flow-col gap-px bg-neutral-800 p-px rounded border border-neutral-700 h-20 md:h-24 overflow-x-auto scrollbar-hide">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -232,11 +329,13 @@
 
                 <div class="w-full mx-auto flex flex-col gap-4">
                     <div id="betting-areas" class="grid grid-cols-5 gap-2 h-24 md:h-36"></div>
-                    <div class="flex items-center justify-between gap-4 bg-black/60 p-4 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-md">
+                    <div
+                        class="flex items-center justify-between gap-4 bg-black/60 p-4 rounded-2xl border border-white/10 shadow-2xl backdrop-blur-md">
                         <div class="flex items-center gap-4">
                             <button id="clear-all-btn" class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-red-900/40 border border-white/10 text-neutral-400 hover:text-red-400 text-[10px] font-black uppercase tracking-tighter transition-all">Recall All</button>
                             <div class="h-8 w-px bg-white/10 mx-2"></div>
-                            <div class="text-neutral-400 font-bold uppercase text-xs tracking-widest hidden sm:block">Chips</div>
+                            <div class="text-neutral-400 font-bold uppercase text-xs tracking-widest hidden sm:block">
+                                Chips</div>
                             <div id="chip-selection" class="flex gap-2"></div>
                         </div>
                         <div class="flex flex-col items-end">
@@ -254,4 +353,5 @@
     <script type="module" src="./logic.js"></script>
     <script type="module" src="./main.js"></script>
 </body>
+
 </html>
