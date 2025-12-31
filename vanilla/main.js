@@ -1,3 +1,4 @@
+
 import * as Game from './logic.js';
 
 // --- State ---
@@ -26,7 +27,6 @@ const elements = {
     initializingLabel: document.getElementById('initializing-label'),
     burnValue: document.getElementById('burn-value'),
     resultLabel: document.getElementById('result-label'),
-    manualLabel: document.getElementById('manual-label'),
     timerDisplay: document.getElementById('timer-display'),
     autoStatus: document.getElementById('auto-status'),
     settingsBtn: document.getElementById('settings-btn'),
@@ -103,15 +103,18 @@ function setMode(mode) {
     
     if (mode === 'auto') {
         elements.intervalContainer.classList.remove('opacity-40', 'pointer-events-none');
+        elements.autoStatus.classList.remove('hidden');
         if (gameState === 'betting') startTimer();
     } else {
         elements.intervalContainer.classList.add('opacity-40', 'pointer-events-none');
+        elements.autoStatus.classList.add('hidden');
         stopTimer();
     }
     render();
 }
 
 function startNewShoe() {
+    // Clear all history and logic
     history = [];
     lastResult = null;
     currentBets = {};
@@ -124,10 +127,9 @@ function startNewShoe() {
     
     elements.initializingLabel.classList.remove('hidden');
     elements.resultLabel.classList.add('hidden');
-    elements.autoStatus.classList.add('hidden');
-    elements.manualLabel.classList.add('hidden');
     elements.burnValue.textContent = burn;
     
+    // Clear roadmap visuals immediately
     render();
 
     setTimeout(() => {
@@ -135,6 +137,7 @@ function startNewShoe() {
         shoeStats.used = burn + 1;
         gameState = 'betting';
         elements.initializingLabel.classList.add('hidden');
+        elements.resultLabel.classList.remove('hidden');
         if (dealMode === 'auto') startTimer();
         render();
     }, 1500);
@@ -192,7 +195,7 @@ function handleDeal(instant = false) {
             gameState = 'betting';
             if (dealMode === 'auto') startTimer();
             render();
-        }, dealMode === 'manual' ? 2000 : 3500);
+        }, dealMode === 'manual' ? 1000 : 4000);
     };
     if (instant) finalize(); else setTimeout(finalize, 1000);
 }
@@ -220,30 +223,28 @@ function render() {
     elements.bankerScore.textContent = lastResult?.bankerScore ?? '0';
 
     // Flash winner hands
-    elements.playerCards.className = elements.playerCards.className.replace(/animate-winner-flash|ring-8|ring-blue-500\/50|ring-green-500\/50/g, "").trim();
-    elements.bankerCards.className = elements.bankerCards.className.replace(/animate-winner-flash|ring-8|ring-red-500\/50|ring-green-500\/50/g, "").trim();
-
-    // Toggle central visibility
-    elements.autoStatus.classList.toggle('hidden', !(gameState === 'betting' && dealMode === 'auto'));
-    elements.manualLabel.classList.toggle('hidden', !(gameState === 'betting' && dealMode === 'manual'));
-    elements.resultLabel.classList.toggle('hidden', gameState !== 'result');
+    elements.playerCards.className = elements.playerCards.className.replace(/animate-winner-flash|ring-4|ring-blue-500\/50|ring-green-500\/50/g, "").trim();
+    elements.bankerCards.className = elements.bankerCards.className.replace(/animate-winner-flash|ring-4|ring-red-500\/50|ring-green-500\/50/g, "").trim();
 
     if (lastResult && gameState === 'result') {
         elements.resultLabel.textContent = lastResult.winner === Game.Winner.Tie ? 'TIE' : lastResult.winner === Game.Winner.Player ? 'PLAYER' : 'BANKER';
-        let baseClasses = "text-center px-4 py-2 md:px-10 md:py-5 rounded-xl font-black text-sm md:text-3xl transition-all shadow-2xl ring-2 ring-white/20 ";
+        let baseClasses = "text-center px-4 py-2 rounded-lg font-black text-xs md:text-lg transition-all shadow-xl ring-1 ring-white/10 ";
         if (lastResult.winner === Game.Winner.Player) {
-          elements.resultLabel.className = baseClasses + "bg-blue-600/90";
-          elements.playerCards.className += " animate-winner-flash ring-8 ring-blue-500/50";
+          elements.resultLabel.className = baseClasses + "bg-blue-600/80 shadow-blue-600/20";
+          elements.playerCards.className += " animate-winner-flash ring-4 ring-blue-500/50";
         }
         else if (lastResult.winner === Game.Winner.Banker) {
-          elements.resultLabel.className = baseClasses + "bg-red-600/90";
-          elements.bankerCards.className += " animate-winner-flash ring-8 ring-red-500/50";
+          elements.resultLabel.className = baseClasses + "bg-red-600/80 shadow-red-600/20";
+          elements.bankerCards.className += " animate-winner-flash ring-4 ring-red-500/50";
         }
         else {
-          elements.resultLabel.className = baseClasses + "bg-green-600/90";
-          elements.playerCards.className += " animate-winner-flash ring-8 ring-green-500/50";
-          elements.bankerCards.className += " animate-winner-flash ring-8 ring-green-500/50";
+          elements.resultLabel.className = baseClasses + "bg-green-600/80 shadow-green-600/20";
+          elements.playerCards.className += " animate-winner-flash ring-4 ring-green-500/50";
+          elements.bankerCards.className += " animate-winner-flash ring-4 ring-green-500/50";
         }
+    } else {
+        elements.resultLabel.textContent = '...';
+        elements.resultLabel.className = 'text-center px-4 py-2 rounded-lg font-black text-xs md:text-lg transition-all shadow-xl ring-1 ring-white/10 bg-white/5 text-white/20';
     }
 
     elements.dealBtnContainer.style.display = (dealMode === 'manual' && gameState === 'betting') ? 'block' : 'none';
@@ -256,17 +257,17 @@ function renderCards(container, cards) {
     if (!container) return;
     container.innerHTML = '';
     if (cards.length === 0) {
-        container.innerHTML = '<div class="w-14 h-20 md:w-28 md:h-40 bg-white/5 border border-white/10 rounded-lg flex items-center justify-center text-white/20 text-4xl">?</div>';
+        container.innerHTML = '<div class="w-12 h-16 md:w-16 md:h-24 bg-white/5 border border-white/10 rounded-md flex items-center justify-center text-white/20">?</div>';
         return;
     }
     cards.forEach(card => {
         const isRed = card.suit === Game.Suit.Hearts || card.suit === Game.Suit.Diamonds;
         const cardEl = document.createElement('div');
-        cardEl.className = 'w-14 h-20 md:w-28 md:h-40 bg-white rounded-lg shadow-xl flex flex-col p-1 md:p-2 transition-all transform hover:-translate-y-1';
+        cardEl.className = 'w-12 h-16 md:w-16 md:h-24 bg-white rounded-md shadow-xl flex flex-col p-1 transition-all transform hover:-translate-y-1';
         cardEl.innerHTML = `
-            <div class="text-[10px] md:text-xl font-bold leading-none ${isRed ? 'text-red-600' : 'text-black'}">${card.rank}</div>
-            <div class="flex-grow flex items-center justify-center text-xl md:text-5xl ${isRed ? 'text-red-600' : 'text-black'}">${card.suit}</div>
-            <div class="text-[10px] md:text-xl font-bold leading-none self-end rotate-180 ${isRed ? 'text-red-600' : 'text-black'}">${card.rank}</div>
+            <div class="text-[10px] md:text-sm font-bold leading-none ${isRed ? 'text-red-600' : 'text-black'}">${card.rank}</div>
+            <div class="flex-grow flex items-center justify-center text-lg md:text-2xl ${isRed ? 'text-red-600' : 'text-black'}">${card.suit}</div>
+            <div class="text-[10px] md:text-sm font-bold leading-none self-end rotate-180 ${isRed ? 'text-red-600' : 'text-black'}">${card.rank}</div>
         `;
         container.appendChild(cardEl);
     });
@@ -274,19 +275,19 @@ function renderCards(container, cards) {
 
 function setupBettingAreas() {
     const areas = [
-        { id: Game.BetTarget.PlayerPair, label: 'P.PAIR', odds: '11:1', bgClass: 'bg-blue-900/40', textClass: 'text-blue-300', large: false },
+        { id: Game.BetTarget.PlayerPair, label: 'PLAYER PAIR', odds: '11:1', bgClass: 'bg-blue-900/40', textClass: 'text-blue-300', large: false },
         { id: Game.BetTarget.Player, label: 'PLAYER', odds: '1:1', bgClass: 'bg-blue-600/80', textClass: 'text-white', large: true },
         { id: Game.BetTarget.Tie, label: 'TIE', odds: '8:1', bgClass: 'bg-green-700/80', textClass: 'text-white', large: true },
         { id: Game.BetTarget.Banker, label: 'BANKER', odds: '0.95:1', bgClass: 'bg-red-600/80', textClass: 'text-white', large: true },
-        { id: Game.BetTarget.BankerPair, label: 'B.PAIR', odds: '11:1', bgClass: 'bg-red-900/40', textClass: 'text-red-300', large: false },
+        { id: Game.BetTarget.BankerPair, label: 'BANKER PAIR', odds: '11:1', bgClass: 'bg-red-900/40', textClass: 'text-red-300', large: false },
     ];
     if (!elements.bettingAreas) return;
     elements.bettingAreas.innerHTML = '';
     areas.forEach(area => {
         const btn = document.createElement('button');
         btn.id = `bet-${area.id.replace(/\s+/g, '-')}`;
-        btn.className = `relative rounded-xl border-2 border-white/10 flex flex-col items-center justify-center transition-all active:scale-95 shadow-lg ${area.bgClass}`;
-        btn.innerHTML = `<span class="${area.large ? 'text-sm font-black' : 'text-[10px] font-bold'} ${area.textClass} tracking-widest uppercase">${area.label}</span><span class="${area.large ? 'text-xl md:text-3xl font-black' : 'text-sm md:text-xl font-bold'} text-white">${area.odds}</span><div id="chip-on-${area.id.replace(/\s+/g, '-')}" class="hidden absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-black px-2 py-0.5 rounded-full text-xs font-bold border-2 border-white shadow-md z-30">$0</div>`;
+        btn.className = `relative rounded-lg border-2 border-white/10 flex flex-col items-center justify-center transition-all active:scale-95 shadow-lg ${area.bgClass}`;
+        btn.innerHTML = `<span class="${area.large ? 'text-sm font-black' : 'text-[10px] font-bold'} ${area.textClass} tracking-widest uppercase">${area.label}</span><span class="${area.large ? 'text-xl font-black' : 'text-sm font-bold'} text-white">${area.odds}</span><div id="chip-on-${area.id.replace(/\s+/g, '-')}" class="hidden absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-black px-2 py-0.5 rounded-full text-xs font-bold border-2 border-white shadow-md z-30">$0</div>`;
         btn.addEventListener('click', () => placeBet(area.id));
         btn.addEventListener('contextmenu', (e) => { e.preventDefault(); clearSpecificBet(area.id); });
         elements.bettingAreas.appendChild(btn);
@@ -336,7 +337,7 @@ function setupChips() {
     CHIP_VALUES.forEach(val => {
         const chip = document.createElement('button');
         let colorClass = val === 100 ? 'bg-black text-white border-neutral-700' : val === 200 ? 'bg-blue-600 text-white border-blue-400' : 'bg-purple-600 text-white border-purple-400';
-        chip.className = "w-10 h-10 md:w-16 md:h-16 rounded-full border-4 flex items-center justify-center font-black text-xs md:text-lg transition-all hover:scale-110 shadow-xl " + colorClass;
+        chip.className = "w-10 h-10 md:w-14 md:h-14 rounded-full border-4 flex items-center justify-center font-black text-[10px] md:text-sm transition-all hover:scale-110 shadow-xl " + colorClass;
         chip.id = `chip-${val}`;
         chip.textContent = val;
         chip.addEventListener('click', () => { selectedChip = val; updateChips(); });
@@ -370,11 +371,11 @@ function renderRoadmaps() {
         return `<div class="w-3 h-3 md:w-4 md:h-4 rounded-full border-[1.5px] flex items-center justify-center relative ${border}">${cell.ties > 0 ? '<div class="absolute w-full h-[1.5px] bg-green-500 rotate-45 pointer-events-none opacity-80"></div>' : ''}${cell.ties > 1 ? `<span class="text-[7px] font-bold text-green-500 z-10 leading-none">${cell.ties}</span>` : ''}</div>`;
     });
     const bebMatrix = Game.generateDerivedRoad(bigMatrix, path, 1);
-    renderDerivedGrid(elements.bigEyeBoy, bebMatrix, 100, 'beb');
+    renderDerivedGrid(elements.bigEyeBoy, bebMatrix, 60, 'beb');
     const smMatrix = Game.generateDerivedRoad(bigMatrix, path, 2);
-    renderDerivedGrid(elements.smallRoad, smMatrix, 100, 'sm');
+    renderDerivedGrid(elements.smallRoad, smMatrix, 60, 'sm');
     const crMatrix = Game.generateDerivedRoad(bigMatrix, path, 3);
-    renderDerivedGrid(elements.cockroachRoad, crMatrix, 100, 'cr');
+    renderDerivedGrid(elements.cockroachRoad, crMatrix, 60, 'cr');
 }
 
 function renderDerivedGrid(container, matrix, cols, type) {
