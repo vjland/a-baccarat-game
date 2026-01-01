@@ -271,8 +271,8 @@ const App: React.FC = () => {
       {payoutWin !== null && <WinSplash amount={payoutWin} onComplete={() => setPayoutWin(null)} />}
 
       <div className="relative h-[55vh] md:h-[50vh] bg-gradient-to-b from-[#1a2b33] to-[#0a1217] flex flex-col items-center justify-center p-3 border-b border-white/10 shadow-2xl z-10">
-        <div className="absolute top-4 left-6 flex items-center gap-4">
-          <img src="logo.png" alt="bac pro logo" className="h-12 w-12 md:h-20 md:w-20 object-contain drop-shadow-2xl" />
+        <div className="absolute top-4 left-6 flex items-center">
+          <img src="logo.png" alt="bac pro logo" className="h-14 w-14 md:h-24 md:w-24 object-contain" />
         </div>
 
         <div className="absolute top-4 right-6 flex items-center gap-3">
