@@ -304,17 +304,17 @@ function renderRoadmap() {
   let roadmapHTML = `
     <div class="flex flex-col w-full bg-[#050a0e] p-0 gap-0 h-full min-h-0 overflow-hidden">
       <div class="flex flex-col bg-black/80 border-b border-white/5 flex-shrink-0">
-        <div class="flex items-center gap-6 px-4 py-2 text-xs md:text-base font-black text-neutral-400 uppercase tracking-widest">
+        <div class="flex items-center gap-6 px-4 py-2 text-base md:text-xl font-black text-neutral-400 uppercase tracking-widest">
           <span class="text-yellow-400">#${stats.total} HANDS</span>
-          <div class="flex items-center gap-2"><span class="w-2 md:w-3 h-2 md:h-3 rounded-full bg-[#1565c0]"></span> ${stats.p}</div>
-          <div class="flex items-center gap-2"><span class="w-2 md:w-3 h-2 md:h-3 rounded-full bg-[#c62828]"></span> ${stats.b}</div>
-          <div class="flex items-center gap-2"><span class="w-2 md:w-3 h-2 md:h-3 rounded-full bg-[#2e7d32]"></span> ${stats.t}</div>
-          <div class="ml-auto text-[10px] md:text-sm text-neutral-500 lowercase font-bold">
+          <div class="flex items-center gap-2"><span class="w-3 md:w-4 h-3 md:h-4 rounded-full bg-[#1565c0]"></span> ${stats.p}</div>
+          <div class="flex items-center gap-2"><span class="w-3 md:w-4 h-3 md:h-4 rounded-full bg-[#c62828]"></span> ${stats.b}</div>
+          <div class="flex items-center gap-2"><span class="w-3 md:w-4 h-3 md:h-4 rounded-full bg-[#2e7d32]"></span> ${stats.t}</div>
+          <div class="ml-auto text-sm md:text-lg text-neutral-500 lowercase font-bold">
             ${usedCards} / ${shoeLength} cards
           </div>
         </div>
         <div class="w-full h-1 bg-white/5">
-          <div class="h-full bg-blue-500" style="width: ${progress}%"></div>
+          <div class="h-full bg-blue-500 transition-all duration-1000" style="width: ${progress}%"></div>
         </div>
       </div>
       <div class="flex flex-col flex-grow min-h-0 overflow-y-auto scrollbar-hide bg-[#0d161d]">
