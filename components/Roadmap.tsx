@@ -5,6 +5,7 @@ import { generateBigRoad, generateDerivedRoad } from '../utils/baccaratLogic';
 
 interface RoadmapProps {
   history: RoundResult[];
+  shoeLength: number;
 }
 
 const RoadGrid: React.FC<{ 
@@ -14,8 +15,6 @@ const RoadGrid: React.FC<{
   bg?: string,
   renderCell: (cell: any, r: number, c: number) => React.ReactNode 
 }> = ({ matrix, cols, cellSize, bg = "bg-white", renderCell }) => (
-  // Removed h-full to prevent rows from stretching vertically.
-  // Using align-content-start to keep the grid compact at the top.
   <div className={`grid grid-rows-6 grid-flow-col ${bg} overflow-x-auto scrollbar-hide w-full content-start`}>
     {Array.from({ length: 6 * cols }).map((_, i) => {
       const r = i % 6, c = Math.floor(i / 6);
@@ -28,10 +27,9 @@ const RoadGrid: React.FC<{
   </div>
 );
 
-export const Roadmap: React.FC<RoadmapProps> = ({ history }) => {
+export const Roadmap: React.FC<RoadmapProps> = ({ history, shoeLength }) => {
   const { matrix: bigRoadMatrix, path } = generateBigRoad(history);
   
-  // Derived roads calculation
   const bigEyeMatrix = generateDerivedRoad(bigRoadMatrix, path, 1);
   const smallRoadMatrix = generateDerivedRoad(bigRoadMatrix, path, 2);
   const cockroachMatrix = generateDerivedRoad(bigRoadMatrix, path, 3);
@@ -43,19 +41,36 @@ export const Roadmap: React.FC<RoadmapProps> = ({ history }) => {
     t: history.filter(h => h.winner === Winner.Tie).length,
   };
 
+  // 8 decks * 52 cards = 416
+  const totalCards = 416;
+  const usedCards = Math.max(0, totalCards - shoeLength);
+  const shoeProgress = (usedCards / totalCards) * 100;
+
   return (
     <div className="flex flex-col w-full bg-[#050a0e] p-0 gap-0 h-full min-h-0 overflow-hidden">
-      {/* Top Section: Statistics Bar - Compact */}
-      <div className="flex items-center gap-3 px-2 py-0.5 bg-black/80 text-[8px] font-black text-neutral-500 border-b border-white/5">
-        <span className="text-yellow-400">#{stats.total} HANDS</span>
-        <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#1565c0]" /> {stats.p}</div>
-        <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#c62828]" /> {stats.b}</div>
-        <div className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#2e7d32]" /> {stats.t}</div>
+      {/* Top Section: Statistics Bar - 100% Larger Fonts */}
+      <div className="flex flex-col bg-black/80 border-b border-white/5">
+        <div className="flex items-center gap-6 px-4 py-2 text-base font-black text-neutral-400 uppercase tracking-widest">
+          <span className="text-yellow-400">#{stats.total} HANDS</span>
+          <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#1565c0]" /> {stats.p}</div>
+          <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#c62828]" /> {stats.b}</div>
+          <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-[#2e7d32]" /> {stats.t}</div>
+          
+          <div className="ml-auto flex items-center gap-3 text-sm text-neutral-500 lowercase font-bold">
+            <span>{usedCards} / {shoeLength} cards</span>
+          </div>
+        </div>
+        {/* Progress Bar */}
+        <div className="w-full h-1 bg-white/5">
+          <div 
+            className="h-full bg-blue-500 transition-all duration-1000" 
+            style={{ width: `${shoeProgress}%` }}
+          />
+        </div>
       </div>
 
       {/* Main Roadmap Area */}
       <div className="flex flex-col flex-grow min-h-0 overflow-y-auto scrollbar-hide bg-[#0d161d]">
-        {/* Big Road - Compact vertical spacing */}
         <div className="border-b border-white/5">
           <RoadGrid matrix={bigRoadMatrix} cols={100} cellSize="w-2.5 h-2.5 md:w-4 md:h-4" bg="bg-black/20" renderCell={(cell) => cell && (
             <div className={`w-[95%] h-[95%] rounded-full border-[1.2px] md:border-[1.8px] relative
@@ -66,7 +81,6 @@ export const Roadmap: React.FC<RoadmapProps> = ({ history }) => {
           )} />
         </div>
 
-        {/* Derived Roads - Stacked Vertically with zero gaps and minimal height */}
         <div className="flex flex-col min-h-0">
           <div className="border-b border-white/5">
             <RoadGrid matrix={bigEyeMatrix} cols={200} cellSize="w-1.5 h-1.5 md:w-2 md:h-2" bg="bg-black/10" renderCell={(color) => color && (

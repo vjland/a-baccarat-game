@@ -10,10 +10,10 @@ interface BettingTableProps {
   balance: number;
 }
 
-const CHIP_VALUES = [5, 10, 20, 50];
+const CHIP_VALUES = [100, 200, 500, 1000];
 
 export const BettingTable: React.FC<BettingTableProps> = ({ onBet, onClearBet, onClearAll, currentBets, balance }) => {
-  const [selectedChip, setSelectedChip] = React.useState(5);
+  const [selectedChip, setSelectedChip] = React.useState(100);
 
   const renderBetArea = (target: BetTarget, label: string, colorClass: string) => {
     const amount = currentBets.get(target) || 0;
@@ -74,7 +74,6 @@ export const BettingTable: React.FC<BettingTableProps> = ({ onBet, onClearBet, o
         <div className="flex flex-col items-end min-w-[50px]">
           <span className="text-[8px] text-neutral-500 uppercase font-bold tracking-widest">总下注</span>
           <span className="text-sm md:text-lg font-black text-yellow-500">
-            {/* Added explicit types to reduce callback to fix 'unknown' operator error */}
             ${Array.from(currentBets.values()).reduce((a: number, b: number) => a + b, 0).toLocaleString()}
           </span>
         </div>

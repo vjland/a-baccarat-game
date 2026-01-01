@@ -51,7 +51,7 @@ const SettingsModal: React.FC<{
 
   return (
     <div className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
-      <div className="bg-[#1a2b33] border border-white/10 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+      <div className="bg-[#1a2b33] border border-white/10 rounded-2xl w-full max-sm p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-black uppercase tracking-widest text-white">Settings</h3>
           <button onClick={onClose} className="text-neutral-500 hover:text-white"><i className="fas fa-times text-xl"></i></button>
@@ -117,8 +117,7 @@ const SettingsModal: React.FC<{
 const App: React.FC = () => {
   const [shoe, setShoe] = useState<Card[]>([]);
   const [history, setHistory] = useState<RoundResult[]>([]);
-  // Added explicit type to balance and currentBets to avoid 'unknown' operator issues
-  const [balance, setBalance] = useState<number>(1000);
+  const [balance, setBalance] = useState<number>(10000);
   const [currentBets, setCurrentBets] = useState<Map<BetTarget, number>>(new Map());
   const [gameState, setGameState] = useState<'betting' | 'dealing' | 'result' | 'initializing' | 'shoeEnd'>('initializing');
   const [lastRound, setLastRound] = useState<RoundResult | null>(null);
@@ -135,18 +134,15 @@ const App: React.FC = () => {
     setLastRound(null);
     setCurrentBets(new Map());
     setGameState('initializing');
-    if (resetBalance) setBalance(1000);
+    if (resetBalance) setBalance(10000);
     
     const newShoe = createShoe(8);
     const firstCard = newShoe[0];
-    // Burn card rule: First card determines number of cards to burn. 
-    // Face cards (10, J, Q, K) = 10. Ace = 1.
     const burnCount = firstCard.value === 0 ? 10 : firstCard.value;
     
     setInitMessage(`Burn Card: ${firstCard.rank}${firstCard.suit} - Discarding ${burnCount} cards`);
 
     setTimeout(() => {
-      // Discard burn card (1) + burnCount cards
       setShoe(newShoe.slice(burnCount + 1));
       setGameState('betting');
       if (isAutoDeal) setCountdown(dealInterval);
@@ -157,7 +153,8 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (gameState === 'betting' && isAutoDeal && countdown > 0) {
-      const timer = setInterval(() => setCountdown(c => c - 1), 1000);
+      // Fix: Add explicit type for countdown state update
+      const timer = setInterval(() => setCountdown((c: number) => c - 1), 1000);
       return () => clearInterval(timer);
     } else if (gameState === 'betting' && isAutoDeal && countdown === 0) {
       handleDeal();
@@ -167,8 +164,10 @@ const App: React.FC = () => {
   const placeBet = (target: BetTarget, amount: number) => {
     if (gameState !== 'betting') return;
     if (balance < amount) return;
-    setBalance(prev => prev - amount);
-    setCurrentBets(prev => {
+    // Fix: Add explicit type for balance state update
+    setBalance((prev: number) => prev - amount);
+    // Fix: Add explicit type for currentBets state update
+    setCurrentBets((prev: Map<BetTarget, number>) => {
       const next = new Map(prev);
       next.set(target, (next.get(target) || 0) + amount);
       return next;
@@ -178,9 +177,9 @@ const App: React.FC = () => {
   const clearSpecificBet = (target: BetTarget) => {
     if (gameState !== 'betting') return;
     const amount = currentBets.get(target) || 0;
-    // Added explicit type to avoid unknown + number error on line 172
     setBalance((prev: number) => prev + amount);
-    setCurrentBets(prev => {
+    // Fix: Add explicit type for currentBets state update
+    setCurrentBets((prev: Map<BetTarget, number>) => {
       const next = new Map(prev);
       next.delete(target);
       return next;
@@ -190,7 +189,6 @@ const App: React.FC = () => {
   const clearAllBets = () => {
     if (gameState !== 'betting') return;
     let total = 0;
-    // Added explicit type to forEach callback
     currentBets.forEach((amt: number) => total += amt);
     setBalance((prev: number) => prev + total);
     setCurrentBets(new Map());
@@ -208,7 +206,6 @@ const App: React.FC = () => {
       setShoe(nextShoe);
       
       let payout = 0;
-      // Added explicit types to avoid unknown operator issues
       currentBets.forEach((amt: number, target: BetTarget) => {
         if (target === BetTarget.Player && result.winner === Winner.Player) payout += amt * 2;
         if (target === BetTarget.Banker && result.winner === Winner.Banker) payout += amt * 2;
@@ -216,7 +213,8 @@ const App: React.FC = () => {
       });
 
       if (payout > 0) setPayoutWin(payout);
-      setBalance(prev => prev + payout);
+      // Fix: Add explicit type for balance state update
+      setBalance((prev: number) => prev + payout);
       setGameState('result');
 
       setTimeout(() => {
@@ -339,7 +337,7 @@ const App: React.FC = () => {
       </div>
 
       <div className="flex-grow min-h-0 relative">
-        <Roadmap history={history} />
+        <Roadmap history={history} shoeLength={shoe.length} />
       </div>
 
       <div className="flex-shrink-0 z-20">

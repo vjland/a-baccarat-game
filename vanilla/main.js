@@ -4,14 +4,14 @@ import { createShoe, playHand, Winner, BetTarget, generateBigRoad, generateDeriv
 // State
 let shoe = [];
 let history = [];
-let balance = 1000;
+let balance = 10000;
 let currentBets = new Map();
 let gameState = 'initializing';
 let lastRound = null;
 let isAutoDeal = false;
 let dealInterval = 5;
 let countdown = 0;
-let selectedChip = 5;
+let selectedChip = 100;
 
 // Elements
 const el = {
@@ -53,7 +53,7 @@ function startNewShoe(resetBalance = false) {
   lastRound = null;
   currentBets.clear();
   gameState = 'initializing';
-  if (resetBalance) balance = 1000;
+  if (resetBalance) balance = 10000;
   
   el.shoeEndOverlay.classList.add('hidden');
   
@@ -296,13 +296,26 @@ function renderRoadmap() {
     t: history.filter(h => h.winner === Winner.Tie).length,
   };
 
+  const totalCards = 416;
+  const shoeLength = shoe.length;
+  const usedCards = Math.max(0, totalCards - shoeLength);
+  const progress = (usedCards / totalCards) * 100;
+
   let roadmapHTML = `
     <div class="flex flex-col w-full bg-[#050a0e] p-0 gap-0 h-full min-h-0 overflow-hidden">
-      <div class="flex items-center gap-3 px-2 py-0.5 bg-black/80 text-[8px] md:text-[10px] font-black text-neutral-500 border-b border-white/5 flex-shrink-0">
-        <span class="text-yellow-400">#${stats.total} HANDS</span>
-        <div class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#1565c0]"></span> ${stats.p}</div>
-        <div class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#c62828]"></span> ${stats.b}</div>
-        <div class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-[#2e7d32]"></span> ${stats.t}</div>
+      <div class="flex flex-col bg-black/80 border-b border-white/5 flex-shrink-0">
+        <div class="flex items-center gap-6 px-4 py-2 text-xs md:text-base font-black text-neutral-400 uppercase tracking-widest">
+          <span class="text-yellow-400">#${stats.total} HANDS</span>
+          <div class="flex items-center gap-2"><span class="w-2 md:w-3 h-2 md:h-3 rounded-full bg-[#1565c0]"></span> ${stats.p}</div>
+          <div class="flex items-center gap-2"><span class="w-2 md:w-3 h-2 md:h-3 rounded-full bg-[#c62828]"></span> ${stats.b}</div>
+          <div class="flex items-center gap-2"><span class="w-2 md:w-3 h-2 md:h-3 rounded-full bg-[#2e7d32]"></span> ${stats.t}</div>
+          <div class="ml-auto text-[10px] md:text-sm text-neutral-500 lowercase font-bold">
+            ${usedCards} / ${shoeLength} cards
+          </div>
+        </div>
+        <div class="w-full h-1 bg-white/5">
+          <div class="h-full bg-blue-500" style="width: ${progress}%"></div>
+        </div>
       </div>
       <div class="flex flex-col flex-grow min-h-0 overflow-y-auto scrollbar-hide bg-[#0d161d]">
         <div class="border-b border-white/5">
@@ -368,7 +381,7 @@ function renderBettingTable() {
               <i class="fas fa-undo text-[10px] md:text-xs"></i>
            </button>
           <div class="flex gap-1 md:gap-2 bg-black/20 p-1 rounded-full border border-white/5">
-            ${[5, 10, 20, 50].map(val => `
+            ${[100, 200, 500, 1000].map(val => `
               <button
                 data-chip="${val}"
                 class="chip-btn w-7 h-7 md:w-12 md:h-12 rounded-full border flex items-center justify-center font-black text-[9px] md:text-sm transition-all shadow-md
