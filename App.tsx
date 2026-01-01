@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, RoundResult, Winner, BetTarget, Suit } from './types';
 import { createShoe, playHand } from './utils/baccaratLogic';
@@ -153,7 +152,6 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (gameState === 'betting' && isAutoDeal && countdown > 0) {
-      // Fix: Add explicit type for countdown state update
       const timer = setInterval(() => setCountdown((c: number) => c - 1), 1000);
       return () => clearInterval(timer);
     } else if (gameState === 'betting' && isAutoDeal && countdown === 0) {
@@ -164,9 +162,7 @@ const App: React.FC = () => {
   const placeBet = (target: BetTarget, amount: number) => {
     if (gameState !== 'betting') return;
     if (balance < amount) return;
-    // Fix: Add explicit type for balance state update
     setBalance((prev: number) => prev - amount);
-    // Fix: Add explicit type for currentBets state update
     setCurrentBets((prev: Map<BetTarget, number>) => {
       const next = new Map(prev);
       next.set(target, (next.get(target) || 0) + amount);
@@ -178,7 +174,6 @@ const App: React.FC = () => {
     if (gameState !== 'betting') return;
     const amount = currentBets.get(target) || 0;
     setBalance((prev: number) => prev + amount);
-    // Fix: Add explicit type for currentBets state update
     setCurrentBets((prev: Map<BetTarget, number>) => {
       const next = new Map(prev);
       next.delete(target);
@@ -213,7 +208,6 @@ const App: React.FC = () => {
       });
 
       if (payout > 0) setPayoutWin(payout);
-      // Fix: Add explicit type for balance state update
       setBalance((prev: number) => prev + payout);
       setGameState('result');
 
@@ -278,20 +272,22 @@ const App: React.FC = () => {
 
       <div className="relative h-[55vh] md:h-[50vh] bg-gradient-to-b from-[#1a2b33] to-[#0a1217] flex flex-col items-center justify-center p-3 border-b border-white/10 shadow-2xl z-10">
         <div className="absolute top-4 left-6 flex items-center gap-4">
-          <button onClick={() => setIsSettingsOpen(true)} className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center border border-blue-400/20 hover:bg-blue-500/30 transition-all">
-            <i className="fas fa-cog text-blue-400 text-lg"></i>
-          </button>
-          <div className="text-sm font-black tracking-[0.2em] text-neutral-500 uppercase">STAKE EXTREME</div>
+          <img src="icon.svg" alt="App Icon" className="w-10 h-10 md:w-12 md:h-12 drop-shadow-[0_0_8px_rgba(0,242,255,0.4)]" />
         </div>
 
-        {gameState === 'betting' && isAutoDeal && (
-          <div className="absolute top-4 right-6 flex items-center gap-3">
-            <div className="text-xs font-black text-green-500 uppercase tracking-widest animate-pulse">Auto Dealing</div>
-            <div className="w-10 h-10 rounded-full border-2 border-green-500 flex items-center justify-center bg-black/60 shadow-lg shadow-green-500/20">
-              <span className="text-sm font-black text-green-500">{countdown}</span>
+        <div className="absolute top-4 right-6 flex items-center gap-3">
+          {gameState === 'betting' && isAutoDeal && (
+            <div className="flex items-center gap-3 mr-2">
+              <div className="text-xs font-black text-green-500 uppercase tracking-widest animate-pulse">Auto Deal</div>
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-green-500 flex items-center justify-center bg-black/60 shadow-lg shadow-green-500/20">
+                <span className="text-xs md:text-sm font-black text-green-500">{countdown}</span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+          <button onClick={() => setIsSettingsOpen(true)} className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10 transition-all">
+            <i className="fas fa-cog text-neutral-400 text-lg"></i>
+          </button>
+        </div>
 
         {gameState === 'initializing' && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">

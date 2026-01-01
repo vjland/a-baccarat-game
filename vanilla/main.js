@@ -96,6 +96,8 @@ function setupEventListeners() {
     if (isAutoDeal && gameState === 'betting') {
       countdown = dealInterval;
       startAutoCountdown();
+    } else {
+      el.autoIndicator.classList.add('hidden');
     }
     updateUI();
   };
