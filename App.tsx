@@ -272,7 +272,7 @@ const App: React.FC = () => {
 
       <div className="relative h-[55vh] md:h-[50vh] bg-gradient-to-b from-[#1a2b33] to-[#0a1217] flex flex-col items-center justify-center p-3 border-b border-white/10 shadow-2xl z-10">
         <div className="absolute top-4 left-6 flex items-center gap-4">
-          <img src="icon.svg" alt="App Icon" className="w-10 h-10 md:w-12 md:h-12 drop-shadow-[0_0_8px_rgba(0,242,255,0.4)]" />
+          <img src="logo.png" alt="bac pro logo" className="h-12 w-12 md:h-20 md:w-20 object-contain drop-shadow-2xl" />
         </div>
 
         <div className="absolute top-4 right-6 flex items-center gap-3">
@@ -284,7 +284,7 @@ const App: React.FC = () => {
               </div>
             </div>
           )}
-          <button onClick={() => setIsSettingsOpen(true)} className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10 transition-all">
+          <button onClick={() => setIsSettingsOpen(true)} className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/20 transition-all">
             <i className="fas fa-cog text-neutral-400 text-lg"></i>
           </button>
         </div>
