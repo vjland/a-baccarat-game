@@ -1,4 +1,3 @@
-
 import { createShoe, playHand, Winner, BetTarget, generateBigRoad, generateDerivedRoad, Suit } from './logic.js';
 
 // State
@@ -296,25 +295,25 @@ function renderRoadmap() {
     t: history.filter(h => h.winner === Winner.Tie).length,
   };
 
-  const totalCards = 416;
-  const shoeLength = shoe.length;
-  const usedCards = Math.max(0, totalCards - shoeLength);
-  const progress = (usedCards / totalCards) * 100;
+  const totalCards = 416; // 8 decks
+  const shoeCount = shoe.length;
+  const usedCount = totalCards - shoeCount;
+  const progress = (usedCount / totalCards) * 100;
 
   let roadmapHTML = `
     <div class="flex flex-col w-full bg-[#050a0e] p-0 gap-0 h-full min-h-0 overflow-hidden">
       <div class="flex flex-col bg-black/80 border-b border-white/5 flex-shrink-0">
-        <div class="flex items-center gap-6 px-4 py-2 text-base md:text-xl font-black text-neutral-400 uppercase tracking-widest">
+        <div class="flex items-center gap-10 px-6 py-4 text-xl md:text-2xl font-black text-neutral-400 uppercase tracking-widest">
           <span class="text-yellow-400">#${stats.total} HANDS</span>
-          <div class="flex items-center gap-2"><span class="w-3 md:w-4 h-3 md:h-4 rounded-full bg-[#1565c0]"></span> ${stats.p}</div>
-          <div class="flex items-center gap-2"><span class="w-3 md:w-4 h-3 md:h-4 rounded-full bg-[#c62828]"></span> ${stats.b}</div>
-          <div class="flex items-center gap-2"><span class="w-3 md:w-4 h-3 md:h-4 rounded-full bg-[#2e7d32]"></span> ${stats.t}</div>
+          <div class="flex items-center gap-3"><span class="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#1565c0]"></span> ${stats.p}</div>
+          <div class="flex items-center gap-3"><span class="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#c62828]"></span> ${stats.b}</div>
+          <div class="flex items-center gap-3"><span class="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#2e7d32]"></span> ${stats.t}</div>
           <div class="ml-auto text-sm md:text-lg text-neutral-500 lowercase font-bold">
-            ${usedCards} / ${shoeLength} cards
+            ${usedCount} / ${shoeCount} cards
           </div>
         </div>
-        <div class="w-full h-1 bg-white/5">
-          <div class="h-full bg-blue-500 transition-all duration-1000" style="width: ${progress}%"></div>
+        <div class="w-full h-1.5 bg-white/5">
+          <div class="h-full bg-blue-500 transition-all duration-700" style="width: ${progress}%"></div>
         </div>
       </div>
       <div class="flex flex-col flex-grow min-h-0 overflow-y-auto scrollbar-hide bg-[#0d161d]">
