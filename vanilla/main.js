@@ -305,16 +305,16 @@ function renderRoadmap() {
   let roadmapHTML = `
     <div class="flex flex-col w-full bg-[#050a0e] p-0 gap-0 h-full min-h-0 overflow-hidden">
       <div class="flex flex-col bg-black/80 border-b border-white/5 flex-shrink-0">
-        <div class="flex items-center gap-10 px-6 py-4 text-xl md:text-2xl font-black text-neutral-400 uppercase tracking-widest">
+        <div class="flex items-center gap-3 px-2 py-1 text-[10px] md:text-xs font-black text-neutral-400 uppercase tracking-widest">
           <span class="text-yellow-400">#${stats.total} HANDS</span>
-          <div class="flex items-center gap-3"><span class="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#1565c0]"></span> ${stats.p}</div>
-          <div class="flex items-center gap-3"><span class="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#c62828]"></span> ${stats.b}</div>
-          <div class="flex items-center gap-3"><span class="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#2e7d32]"></span> ${stats.t}</div>
-          <div class="ml-auto text-sm md:text-lg text-neutral-500 lowercase font-bold">
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#1565c0]"></span> ${stats.p}</div>
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#c62828]"></span> ${stats.b}</div>
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-[#2e7d32]"></span> ${stats.t}</div>
+          <div class="ml-auto text-[9px] md:text-[10px] text-neutral-500 lowercase font-bold">
             ${usedCount} / ${shoeCount} cards
           </div>
         </div>
-        <div class="w-full h-1.5 bg-white/5">
+        <div class="w-full h-1 bg-white/5">
           <div class="h-full bg-blue-500 transition-all duration-700" style="width: ${progress}%"></div>
         </div>
       </div>
@@ -356,7 +356,7 @@ function renderGrid(matrix, cols, cellSize, bg, renderCell) {
   for (let i = 0; i < 6 * cols; i++) {
     const r = i % 6, c = Math.floor(i / 6);
     const content = renderCell(matrix[r]?.[c], r, c) || '';
-    gridItems += `<div class="${cellSize} flex items-center justify-center border-[0.1px] border-white/5 relative">${content}</div>`;
+    gridItems += `<div class="${cellSize} flex items-center justify-center relative">${content}</div>`;
   }
   return `<div class="grid grid-rows-6 grid-flow-col ${bg} overflow-x-auto scrollbar-hide w-full content-start">${gridItems}</div>`;
 }
