@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, RoundResult, Winner, BetTarget, Suit } from './types';
-import { createShoe, playHand } from './utils/baccaratLogic';
+import { createShoe, playHand, calculateScore } from './utils/baccaratLogic';
 import { Roadmap } from './components/Roadmap';
 import { BettingTable } from './components/BettingTable';
 
@@ -194,8 +195,57 @@ const App: React.FC = () => {
     setGameState('dealing');
     const { result, usedCards } = playHand(shoe);
     
+    // Initial display state
+    const displayRound: RoundResult = {
+      ...result,
+      playerCards: [],
+      bankerCards: [],
+      playerScore: 0,
+      bankerScore: 0
+    };
+    setLastRound(displayRound);
+
+    const dealStepTime = 750; // 0.75 seconds
+    const steps = [
+      () => { // P1
+        displayRound.playerCards = [result.playerCards[0]];
+        displayRound.playerScore = calculateScore(displayRound.playerCards);
+        setLastRound({ ...displayRound });
+      },
+      () => { // B1
+        displayRound.bankerCards = [result.bankerCards[0]];
+        displayRound.bankerScore = calculateScore(displayRound.bankerCards);
+        setLastRound({ ...displayRound });
+      },
+      () => { // P2
+        displayRound.playerCards = [result.playerCards[0], result.playerCards[1]];
+        displayRound.playerScore = calculateScore(displayRound.playerCards);
+        setLastRound({ ...displayRound });
+      },
+      () => { // B2
+        displayRound.bankerCards = [result.bankerCards[0], result.bankerCards[1]];
+        displayRound.bankerScore = calculateScore(displayRound.bankerCards);
+        setLastRound({ ...displayRound });
+      },
+      ...(result.playerCards[2] ? [() => { // P3
+        displayRound.playerCards = result.playerCards;
+        displayRound.playerScore = calculateScore(displayRound.playerCards);
+        setLastRound({ ...displayRound });
+      }] : []),
+      ...(result.bankerCards[2] ? [() => { // B3
+        displayRound.bankerCards = result.bankerCards;
+        displayRound.bankerScore = calculateScore(displayRound.bankerCards);
+        setLastRound({ ...displayRound });
+      }] : [])
+    ];
+
+    steps.forEach((step, index) => {
+      setTimeout(step, index * dealStepTime);
+    });
+
+    const totalSteps = steps.length;
     setTimeout(() => {
-      setLastRound(result);
+      // Finalize hand
       setHistory(prev => [...prev, result]);
       const nextShoe = shoe.slice(usedCards);
       setShoe(nextShoe);
@@ -213,7 +263,6 @@ const App: React.FC = () => {
 
       setTimeout(() => {
         setCurrentBets(new Map());
-        
         if (nextShoe.length < 15) {
           setGameState('shoeEnd');
         } else {
@@ -221,7 +270,7 @@ const App: React.FC = () => {
           if (isAutoDeal) setCountdown(dealInterval);
         }
       }, 3000);
-    }, 800);
+    }, totalSteps * dealStepTime + 200);
   };
 
   const isPlayerWinner = gameState === 'result' && (lastRound?.winner === Winner.Player || lastRound?.winner === Winner.Tie);
@@ -231,8 +280,13 @@ const App: React.FC = () => {
     <div className={`flex flex-col items-center gap-2 md:gap-4 transition-all ${isWinner ? 'animate-winner-flash' : ''}`}>
       <div className="flex flex-col items-center gap-1.5 md:gap-3">
         <div className="flex gap-2">
-          {cards ? (
+          {cards && cards.length >= 2 ? (
             cards.slice(0, 2).map((c, i) => <CardUI key={i} card={c} />)
+          ) : cards && cards.length === 1 ? (
+             <>
+               <CardUI card={cards[0]} />
+               <div className="w-12 md:w-32 aspect-[2.5/3.5] bg-white/5 border border-white/10 rounded-lg shadow-inner" />
+             </>
           ) : (
             <>
               <div className="w-12 md:w-32 aspect-[2.5/3.5] bg-white/5 border border-white/10 rounded-lg shadow-inner" />

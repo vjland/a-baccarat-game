@@ -1,4 +1,5 @@
-import { createShoe, playHand, Winner, BetTarget, generateBigRoad, generateDerivedRoad, Suit } from './logic.js';
+
+import { createShoe, playHand, calculateScore, Winner, BetTarget, generateBigRoad, generateDerivedRoad, Suit } from './logic.js';
 
 // State
 let shoe = [];
@@ -174,6 +175,37 @@ function handleDeal() {
   
   const { result, usedCards } = playHand(shoe);
   
+  // Animation state
+  let visiblePlayerCards = [];
+  let visibleBankerCards = [];
+  const dealStepTime = 750;
+
+  const steps = [
+    () => { visiblePlayerCards = [result.playerCards[0]]; },
+    () => { visibleBankerCards = [result.bankerCards[0]]; },
+    () => { visiblePlayerCards = [result.playerCards[0], result.playerCards[1]]; },
+    () => { visibleBankerCards = [result.bankerCards[0], result.bankerCards[1]]; },
+    ...(result.playerCards[2] ? [() => { visiblePlayerCards = result.playerCards; }] : []),
+    ...(result.bankerCards[2] ? [() => { visibleBankerCards = result.bankerCards; }] : [])
+  ];
+
+  steps.forEach((step, index) => {
+    setTimeout(() => {
+      step();
+      // Temporary lastRound update for UI
+      const displayRound = {
+        ...result,
+        playerCards: visiblePlayerCards,
+        bankerCards: visibleBankerCards,
+        playerScore: calculateScore(visiblePlayerCards),
+        bankerScore: calculateScore(visibleBankerCards)
+      };
+      renderHandsOnly(displayRound);
+    }, index * dealStepTime);
+  });
+
+  const totalStepsTime = steps.length * dealStepTime;
+  
   setTimeout(() => {
     lastRound = result;
     history.push(result);
@@ -205,7 +237,7 @@ function handleDeal() {
         updateUI();
       }
     }, 3000);
-  }, 800);
+  }, totalStepsTime + 200);
 }
 
 function showWinSplash(amount) {
@@ -237,7 +269,7 @@ function createCardHTML(card) {
 }
 
 function renderHand(container, cards) {
-  if (!cards) {
+  if (!cards || cards.length === 0) {
     container.innerHTML = `
       <div class="flex gap-1 md:gap-2">
         <div class="w-10 h-14 md:w-32 md:h-44 bg-white/5 border border-white/10 rounded-md md:rounded-lg shadow-inner"></div>
@@ -250,7 +282,13 @@ function renderHand(container, cards) {
     return;
   }
   
-  const row1 = `<div class="flex gap-1 md:gap-2">${cards.slice(0, 2).map(createCardHTML).join('')}</div>`;
+  let row1;
+  if (cards.length === 1) {
+    row1 = `<div class="flex gap-1 md:gap-2">${createCardHTML(cards[0])}<div class="w-10 h-14 md:w-32 md:h-44 bg-white/5 border border-white/10 rounded-md md:rounded-lg shadow-inner"></div></div>`;
+  } else {
+    row1 = `<div class="flex gap-1 md:gap-2">${cards.slice(0, 2).map(createCardHTML).join('')}</div>`;
+  }
+
   const row2 = cards[2] 
     ? `<div class="w-10 h-14 md:w-32 md:h-44 flex items-center justify-center">${createCardHTML(cards[2])}</div>`
     : `<div class="w-10 h-14 md:w-32 md:h-44 bg-transparent"></div>`;
@@ -261,6 +299,13 @@ function renderHand(container, cards) {
       ${row2}
     </div>
   `;
+}
+
+function renderHandsOnly(round) {
+  renderHand(el.playerCardsGrid, round.playerCards);
+  renderHand(el.bankerCardsGrid, round.bankerCards);
+  el.playerLabel.textContent = `闲 ${round.playerScore}`;
+  el.bankerLabel.textContent = `庄 ${round.bankerScore}`;
 }
 
 function updateUI() {
